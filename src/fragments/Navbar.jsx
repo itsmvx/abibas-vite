@@ -4,20 +4,29 @@ import {useEffect, useState} from "react";
 import {useSpring, animated} from "@react-spring/web";
 
 export const Navbar = ({userPreferences, setUserPreferences}) => {
-    const [isScrollDown, setIsScrollDown] = useState(false)
+    const [isScrollDownState, setIsScrollDownState] = useState(false)
+    const [searchTextValue, setSearchTextValue] = useState('')
     const navbarAnimation = useSpring({
-        transform: isScrollDown ? 'translateY(-100%)' : 'translateY(0%)',
+        transform: isScrollDownState ? 'translateY(-100%)' : 'translateY(0%)',
         config: {
             duration: 225
         }
     })
 
+    const handleSearchTextChange = event => {
+        event.target.value === '' ? setSearchTextValue(event.target.value) : setSearchTextValue(event.target.value)
+    }
+    const handleSearchTextReset = () => {
+        setSearchTextValue('')
+    }
+
+    console.log('search',searchTextValue)
     useEffect(() => {
         let lastScrollY = window.scrollY;
         const smallDevices = userPreferences && isMobile
         const handleScroll = () => {
             const currentScrollY = window.scrollY;
-            (currentScrollY > 80) && !smallDevices && currentScrollY > lastScrollY ? setIsScrollDown(true) : setIsScrollDown(false)
+            (currentScrollY > 80) && !smallDevices && currentScrollY > lastScrollY ? setIsScrollDownState(true) : setIsScrollDownState(false)
             
             lastScrollY = currentScrollY;
         };
@@ -29,16 +38,18 @@ export const Navbar = ({userPreferences, setUserPreferences}) => {
 
     return (
         <>
-            <animated.nav style={navbarAnimation} className="w-full h-20 bg-white flex flex-row fixed top-0 left-0">
+            <animated.nav style={navbarAnimation} className="w-full h-[15vh] bg-white flex flex-row fixed top-0 left-0 z-50">
                 { (isMobile && !useMobileOrientation || userPreferences.smallWindow ) && (
                     <button className="basis-1/6 w-full flex-none flex items-center justify-center ">
                         <i className="bi bi-list text-2xl"></i>
                     </button>
                 )}
                 <div className="basis-2/5 sm:basis-[15%] w-full flex-1 flex flex-row items-center justify-center">
-                    <img src="/src/assets/img/abibas-logo.webp"
-                         className="w-12 sm:w-14"
-                         alt="..."/>
+                    <img
+                        // src="/src/assets/abibas-logo.webp"
+                        src="https://cdn.discordapp.com/attachments/1104037318521798746/1165044484166385754/abibas-logo.webp?ex=65456b3a&is=6532f63a&hm=f4a9a5361de75526e40785f186111e4d3af0ce76133bccf0f972ee00304aae02&"
+                        className="w-12 sm:w-14"
+                        alt="..."/>
                     <h1 className="mt-2 font-breston font-bold text-3xl">ABIBAS</h1>
                 </div>
                 <div className="basis-1/6 sm:basis-[40%] w-full sm:flex-1 flex flex-row sm:flex-col">
@@ -72,8 +83,30 @@ export const Navbar = ({userPreferences, setUserPreferences}) => {
                             </div>
                         )}
 
-                        <div className="basis-2/3 flex-1 flex sm:justify-end w-full h-full">
-                            <button className="text-2xl mx-auto sm:mr-3.5">
+                        <div className="basis-2/3 flex-1 flex flex-row justify-end sm:justify-end w-full h-full">
+
+                            { !((isMobile && !useMobileOrientation) || userPreferences.smallWindow) && (
+                                <div className="basis-1/2 relative w-full border-[1.5px] border-black rounded-md overflow-hidden antialiased ">
+                                    <input
+                                        type="text"
+                                        value={searchTextValue}
+                                        className="w-full h-full bg-zinc-100 focus:outline-0 text-sm font-medium indent-2"
+                                        placeholder="ABIBAS Ori Cibaduyut"
+                                        onInput={handleSearchTextChange}
+                                    />
+                                    { searchTextValue !== '' ? (
+                                        <button
+                                            className="absolute right-1 top-1/2 -translate-y-1/2"
+                                            onClick={handleSearchTextReset}
+                                        >
+                                            <i className="bi bi-x-circle"></i>
+                                        </button>
+                                        )
+                                        : '' }
+                                </div>
+
+                            )}
+                            <button className="basis-2/12 text-2xl mx-auto sm:mx-0 fill-none">
                                 <i className="bi bi-search"></i>
                             </button>
                         </div>
@@ -81,7 +114,7 @@ export const Navbar = ({userPreferences, setUserPreferences}) => {
                 </div>
             </animated.nav>
 
-            <animated.div className="fixed mt-20 top-0 left-0 w-full h-96 bg-slate-50">
+            <animated.div className="fixed mt-20 top-0 left-0 w-full h-96 bg-slate-50 hidden">
 
             </animated.div>
         </>
