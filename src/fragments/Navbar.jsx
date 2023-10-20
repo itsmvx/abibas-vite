@@ -38,7 +38,7 @@ export const Navbar = ({userPreferences, setUserPreferences}) => {
 
     return (
         <>
-            <animated.nav style={navbarAnimation} className="w-full h-[15vh] bg-white flex flex-row fixed top-0 left-0 z-50">
+            <animated.nav style={navbarAnimation} className={`${!((isMobile && !useMobileOrientation) || userPreferences.smallWindow) ? 'h-[15vh]' : 'h-[10vh]'} w-full h-[15vh] bg-white flex flex-row fixed top-0 left-0 z-50`}>
                 { (isMobile && !useMobileOrientation || userPreferences.smallWindow ) && (
                     <button className="basis-1/6 w-full flex-none flex items-center justify-center ">
                         <i className="bi bi-list text-2xl"></i>

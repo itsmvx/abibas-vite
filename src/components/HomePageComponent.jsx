@@ -10,7 +10,7 @@ export const HomePageComponent = ({userPreferences, setUserPreferences}) => {
                 userPreferences={userPreferences}
                 setUserPreferences={setUserPreferences}
             />
-            <div className={`mt-[15vh] flex ${!((isMobile && !useMobileOrientation) || userPreferences.smallWindow) ? 'flex-row' : 'flex-col'} w-full h-[85vh] bg-cyan-500`}>
+            <div className={`flex ${!((isMobile && !useMobileOrientation) || userPreferences.smallWindow) ? 'flex-row mt-[15vh] h-[85vh]' : 'flex-col mt-[10vh] h-[90vh]'} w-full  bg-cyan-500`}>
                 <div className={`${!((isMobile && !useMobileOrientation) || userPreferences.smallWindow) ? 'order-first' : 'order-last'} basis-[45%] w-full h-full bg-white flex flex-col`}>
                     <div className={`${!((isMobile && !useMobileOrientation) || userPreferences.smallWindow) ? 'basis-1/3' : 'basis-1/5'} flex items-center justify-center w-full h-full flex-none`}>
                         <h1 className="text-center text-4xl md:text-6xl text-black font-bold tracking-tighter mx-3">
