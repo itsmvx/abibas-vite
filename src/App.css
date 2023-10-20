@@ -1,0 +1,10 @@
+@font-face {
+    font-family: 'Breston';
+    font-style: italic;
+    font-weight: 400;
+    src: local('Breston'), url('https://fonts.cdnfonts.com/s/105655/breston-oblique.woff') format('woff');
+}
+
+.font-breston {
+    font-family: 'Breston', sans-serif;
+}
