@@ -11,26 +11,28 @@ export const HomePageComponent = ({userPreferences, setUserPreferences}) => {
                 setUserPreferences={setUserPreferences}
             />
             <div className={`mt-[15vh] flex ${!((isMobile && !useMobileOrientation) || userPreferences.smallWindow) ? 'flex-row' : 'flex-col'} w-full h-[85vh] bg-cyan-500`}>
-                <div className="basis-[45%] w-full h-full bg-white flex flex-col">
-                    <div className="basis-1/3 flex items-center justify-center w-full h-full flex-none">
-                        <h1 className="text-center text-6xl text-black font-bold tracking-tighter mx-3">
+                <div className={`${!((isMobile && !useMobileOrientation) || userPreferences.smallWindow) ? 'order-first' : 'order-last'} basis-[45%] w-full h-full bg-white flex flex-col`}>
+                    <div className={`${!((isMobile && !useMobileOrientation) || userPreferences.smallWindow) ? 'basis-1/3' : 'basis-1/5'} flex items-center justify-center w-full h-full flex-none`}>
+                        <h1 className="text-center text-4xl md:text-6xl text-black font-bold tracking-tighter mx-3">
                             Kurodate Haruna Series
                         </h1>
                     </div>
-                    <div className="basis-2/3 flex flex-col">
-                        <div className="basis-1/2 flex-none mx-5  text-lg text-justify tracking-tight leading-relaxed overflow-y-hidden">
-                            <p className="text-center font-bold">
-                                READY! SET GO!!
-                            </p>
-                            <p className="indent-8">
-                                She looks at the atmosphere of her meals, how they are prepared, what ingredients and tools are used, where she eats. The idea is that through all of this, her food will taste even better.
-                            </p>
-
-                        </div>
-                        <div className="basis-1/2 flex-none flex items-start">
-                            <button className="mx-5 mt-7 px-2 h-12 font-semibold bg-black text-white">
+                    <div className={`${!((isMobile && !useMobileOrientation) || userPreferences.smallWindow) ? 'basis-2/3' : 'basis-4/5' }`}>
+                        <div className={`relative h-full overflow-hidden text-ellipsis mx-5`}>
+                            <div className="w-full h-3/4 text-justify tracking-tight leading-relaxed overflow-hidden">
+                                <p className="text-center text-lg font-bold">
+                                    READY! SET GO!!
+                                </p>
+                                <p className="indent-8">
+                                    She looks at the atmosphere of her meals, how they are prepared, what ingredients and tools are used, where she eats. The idea is that through all of this, her food will taste even better.
+                                </p>
+                            </div>
+                            <button className={`absolute ${((isMobile && !useMobileOrientation) || userPreferences.smallWindow) && 'left-1/2 -translate-x-1/2' } top-3/4 px-1.5 h-12 font-semibold bg-black text-white`}>
                                 SEE GALLERIES <i className="bi bi-caret-right"></i>
                             </button>
+                        </div>
+                        <div className={`${!((isMobile && !useMobileOrientation) || userPreferences.smallWindow) ? 'basis-1/2' : 'basis-1/4'} basis-1/2 flex-none flex items-start`}>
+
                         </div>
                     </div>
                 </div>
@@ -50,13 +52,13 @@ export const HomePageComponent = ({userPreferences, setUserPreferences}) => {
 
             </div><div className="w-full h-96 bg-red-500">
 
-            </div><div className="w-full h-96 bg-fuchsia-500">
+        </div><div className="w-full h-96 bg-fuchsia-500">
 
-            </div><div className="w-full h-96 bg-yellow-500">
+        </div><div className="w-full h-96 bg-yellow-500">
 
-            </div><div className="w-full h-96 bg-purple-500">
+        </div><div className="w-full h-96 bg-purple-500">
 
-            </div>
+        </div>
         </>
     )
 }

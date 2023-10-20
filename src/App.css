@@ -8,3 +8,7 @@
 .font-breston {
     font-family: 'Breston', sans-serif;
 }
+
+*{
+    -webkit-tap-highlight-color: rgb(0,0,0,0);
+}
