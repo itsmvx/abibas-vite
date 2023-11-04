@@ -1,35 +1,35 @@
-import React, {useEffect, useState} from "react";
+import React from "react";
 import {createBrowserRouter, RouterProvider} from "react-router-dom";
-import {HomePageComponent} from "./components/HomePageComponent.jsx";
+import {ErrorPage} from "./pages/ErrorPage.jsx";
+import {HomePage} from "./pages/HomePage.jsx";
+import {StorePage} from "./pages/StorePage.jsx";
 import './App.css'
+import {StoreContentCollage} from "./components/StoreFragments/StoreContentCollage.jsx";
+import {LoginPage} from "./pages/LoginPage.jsx";
+import {AdminPage} from "./pages/AdminPage.jsx";
+
 function App() {
-  const [userState, setUserState] = useState({
-    theme: localStorage.getItem('theme') === '' ? 'light' : localStorage.getItem('theme'),
-    smallWindow: window.innerWidth < 640,
-  })
-
-  useEffect(() => {
-    const handleResize = () => {
-      setUserState(prevState => ({
-        ...prevState,
-        smallWindow: window.innerWidth < 640
-      }))
-    }
-    window.addEventListener('resize', handleResize)
-    return ()=>{
-      window.removeEventListener('resize', handleResize)
-    }
-  }, []);
-
   const router = createBrowserRouter([
     {
       path: "/",
-      element:
-          <HomePageComponent
-              userPreferences={userState}
-              setUserPreferences={()=>setUserState}
-          />
+      element: <HomePage/>,
     },
+    {
+      path: "/admin-abibas",
+      element: <LoginPage/>,
+    },
+    {
+      path: "/store",
+      element: <StorePage/>,
+    },
+    {
+      path: "/admin/dashboard",
+      element: <AdminPage/>
+    },
+    {
+      path: "*",
+      element: <ErrorPage/>
+    }
   ]);
 
   return (

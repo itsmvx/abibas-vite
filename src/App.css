@@ -3,6 +3,7 @@
     font-style: italic;
     font-weight: 400;
     src: local('Breston'), url('https://fonts.cdnfonts.com/s/105655/breston-oblique.woff') format('woff');
+    font-display: swap;
 }
 
 .font-breston {
@@ -11,4 +12,21 @@
 
 *{
     -webkit-tap-highlight-color: rgb(0,0,0,0);
+}
+
+.whatsHotDesc {
+    @apply transition-opacity duration-500 absolute top-0 bottom-0 w-full bg-zinc-100/90 flex flex-col
+}
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0);
+}
+::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }

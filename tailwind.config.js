@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: ['class', '[data-mode="dark-mode"]'],
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -8,6 +9,7 @@ export default {
     extend: {},
   },
   plugins: [
-      require('tailwindcss-animated')
+    // eslint-disable-next-line no-undef
+    require('tailwindcss-animated')
   ],
 }
