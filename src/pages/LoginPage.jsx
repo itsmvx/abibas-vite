@@ -57,10 +57,10 @@ export const LoginPage = () => {
                     isSubmit: false,
                     isError: true,
                 })
-                setFormField({
-                    username: '',
+                setFormField(prevstate => ({
+                    ...prevstate,
                     password: '',
-                })
+                }))
             })
     }
 

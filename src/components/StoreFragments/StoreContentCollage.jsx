@@ -1,85 +1,23 @@
 import {PropTypes} from "prop-types";
-import {useState, useEffect, useRef} from "react";
+import {useState, useEffect, useRef, useContext} from "react";
 import {useSprings, animated} from "@react-spring/web";
 import StudentData from "../../lib/StudentData.jsx";
-export const StoreContentCollage = ({sortState, storeSearchParams, setStoreSearchParams}) => {
-    const [data, setData] = useState(StudentData.slice(0,20))
-    const [indexCollageHover, setIndexCollageHover] = useState(-1)
-    const elementRefs = useRef([])
-    const [collageAnimation, collageAnimationApi] = useSprings(
-        data.length,
-        () => ({
-            from: { filter: 'contrast(30%)' },
-            to: { filter: 'contrast(100%)' },
-            config: { duration: 550 }
-        }),
-        [data, sortState]
-    )
-    const [collageDetailAnimation, collageDetailAnimationApi] = useSprings(
-        data.length,
-        () => ({
-            from: { opacity: 0 },
-            to: { opacity: 1 },
-            config: { duration: 400 }
-        })
-    )
-
-    const handleCollageHoverIn = indexKey => {
-        elementRefs.current[indexKey].current.classList.remove('hidden')
-        collageDetailAnimationApi.start(i => i === indexKey && {
-            from: { opacity: 0, y : 300 },
-            to: { opacity: 1, y : 0 },
-            config: { duration: 250 }
-        })
-        setIndexCollageHover(indexKey);
-    };
-    const handleCollageHoverOut = () => {
-        setTimeout(()=>{
-            elementRefs.current[indexCollageHover].current.classList.add('hidden')
-        },180)
-
-        collageDetailAnimationApi.start(i => i === indexCollageHover && {
-            from: { y : 0 },
-            to: { y : 300 },
-            config: { duration: 200 }
-        })
-        setIndexCollageHover(-1)
-    }
-
-    useEffect(() => {
-        const sortData = () => {
-            const newData = [...data]
-            switch (sortState){
-                case 'ascending' :
-                    newData.sort((a,b)=> a.names.lastName < b.names.lastName ? -1 : 1)
-                    break
-                case 'descending' :
-                    newData.sort((a,b) => a.names.lastName > b.names.lastName ? -1 : 1 )
-                    break
-                case 'cheap' :
-                    newData.sort((a,b) => a.birthday < b.birthday ? -1 : 1 )
-                    break
-                case 'expensive' :
-                    newData.sort((a,b) => a.age < b.age ? -1 : 1 )
-                    break
-                default :
-                    newData.sort((a,b) => a.school < b.school ? -1 : 1 )
-                    break
-            }
-            collageAnimationApi.start({
-                from: { filter: 'contrast(30%)' },
-                to: { filter: 'contrast(100%)' },
-                config: { duration: 550 }
-            });
-            setData(newData)
-        }
-        sortData()
-    }, [sortState]);
+import StoreContext from "../StoreContext.jsx";
+export const StoreContentCollage = () => {
+    
+    const {
+        collageAnimation,
+        collageDetailAnimation,
+        handleCollageHoverIn,
+        handleCollageHoverOut,
+        data,
+        collageElementRefs,
+    } = useContext(StoreContext)
 
     const defaultCollage = () => {
         return collageAnimation.map((props,index) => {
             // eslint-disable-next-line react-hooks/rules-of-hooks
-            elementRefs.current[index] = useRef(null)
+            collageElementRefs.current[index] = useRef(null)
             return (
                 <animated.div key={index} style={props} className="relative basis-2/5 lg:basis-[32%] mx-auto md:mx-0 my-auto bg-white aspect-[4/5] overflow-hidden hover:border-[1.5px] hover:border-black hover:scale-105 transition-scale hover:duration-300"
                               onMouseEnter={()=> handleCollageHoverIn(index)}
@@ -89,7 +27,7 @@ export const StoreContentCollage = ({sortState, storeSearchParams, setStoreSearc
                     </div>
                     <animated.div
                         style={collageDetailAnimation[index]}
-                        ref={elementRefs.current[index]}
+                        ref={collageElementRefs.current[index]}
                         className="absolute hidden top-[59.5%] bottom-0 w-full h-full z-10 overflow-hidden"
                     >
                         <div className="w-full h-full mx-auto bg-fuchsia-400 flex justify-center">
@@ -121,6 +59,4 @@ export const StoreContentCollage = ({sortState, storeSearchParams, setStoreSearc
 
 StoreContentCollage.propTypes = {
     sortState: PropTypes.string,
-    storeSearchParams: PropTypes.object,
-    setStoreSearchParams: PropTypes.func,
 }
