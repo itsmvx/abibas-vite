@@ -7,15 +7,77 @@ import StoreContext from "./StoreContext.jsx";
 import { StoreNavbar } from "./StoreFragments/StoreNavbar.jsx";
 import { StoreFilterbar } from "./StoreFragments/StoreFilterbar.jsx";
 import { StoreContentCollage } from "./StoreFragments/StoreContentCollage.jsx";
+import {StoreSearchbar} from "./StoreFragments/StoreSearchbar.jsx";
+import axios from "axios";
 
 export const StoreViewWeb = () => {
+    let ubedzApi = 'http://127.0.0.1:8000'
     // <--> STORE Universal <---> //
-    const [utilityState, setUtilityState] = useState({
+    const [mobileUtilsState, setMobileUtilsState] = useState({
         filter: false,
         search: false,
     })
+    const [searchingState, setSearchingState] = useState({
+        isSearching: false,
+        isNotFound: false,
+        searchValue: '',
+        searchData: [],
+    })
+    const searchModalRef = useRef(null)
     let [storeSearchParams, setStoreSearchParams] = useSearchParams('')
     const [storeHeadingText, setStoreHeadingText] = useState('')
+    const handleSearchingStart = searchValue => {
+        const searchVal = searchValue
+        if (searchVal === '' )
+            setSearchingState({
+                isSearching: false,
+                isNotFound: false,
+                searchValue: '',
+                searchData: [],
+            })
+        else {
+            setSearchingState({
+                isSearching: true,
+                isNotFound: false,
+                searchValue: searchVal,
+                searchData: [],
+            })
+            axios.get(ubedzApi+'/api/search-products',
+                {
+                    params: {
+                        search: searchVal
+                    },
+                    timeout: 5000,
+                })
+                .then(response => {
+                    console.log(response.data.data)
+                    if (response.data.data.length === 0){
+                        setSearchingState(prevState => ({
+                            ...prevState,
+                            isNotFound: true
+                        }))
+                    }
+                    else {
+                        setSearchingState({
+                            isSearching: true,
+                            isNotFound: false,
+                            searchValue: event.target.value,
+                            searchData: response.data.data,
+                        })
+                    }
+                })
+                .catch(()=>{
+                    setSearchingState({
+                        isSearching: false,
+                        isNotFound: false,
+                        searchValue: '',
+                        searchData: [],
+                    })
+                })
+
+        }
+    }
+
     useEffect(() => {
         let headingText
         storeSearchParams.get('series')
@@ -28,7 +90,15 @@ export const StoreViewWeb = () => {
 
         setStoreHeadingText(headingText)
     }, [storeSearchParams]);
-    // <--> END OF STORE Universal <---> //
+    // <--> END OF STORE Universal <--> //
+
+    //STORE SEARCH
+    const searchbarRef = useRef(null)
+    const [searchbarAnimation, searchbarAnimationApi] = useSpring(()=>({
+        from: {x: 0},
+        to: {x: 0},
+        config: {duration: 500},
+    }))
 
     // <--> STORE NAVBAR <--> //
     const [isSortMenuOpen, setIsSortMenuOpen] = useState(false)
@@ -53,38 +123,42 @@ export const StoreViewWeb = () => {
         }))
     }
     const handleSearchOpen = () => {
-        setUtilityState(prevState => ({
+        setMobileUtilsState(prevState => ({
             ...prevState,
             search: true
         }))
+        searchbarAnimationApi.start({
+            from: {x: 1000},
+            to: {x: 0},
+            config: {duration: 500},
+        })
+        searchbarRef.current.classList.remove('hidden')
+
     }
     const handleSearchClose = () => {
-        setUtilityState(prevState => ({
+        setMobileUtilsState(prevState => ({
             ...prevState,
             search: false,
         }))
+        searchbarAnimationApi.start({
+            from: {x: 0},
+            to: {x: 1000},
+            config: {duration: 500},
+        })
+        setTimeout(()=> searchbarRef.current.classList.add('hidden'), 510)
     }
     const handleFilterOpen = () => {
-        setUtilityState(prevState => ({
+        setMobileUtilsState(prevState => ({
             ...prevState,
             filter: true
         }))
     }
     const handleFilterClose = () => {
-        setUtilityState(prevState => ({
+        setMobileUtilsState(prevState => ({
             ...prevState,
             filter: false,
         }))
     }
-
-
-    //STORE SIDEBAR
-    const sidebarRef = useRef(null)
-    const sidebarAnimation = useSpring({
-        from: {x: utilityState.filter || utilityState.search ? 1000 : 0},
-        to: {x: utilityState.filter || utilityState.search ? 0 : 1000},
-        config: {duration: 500},
-    })
 
 
     // STORE COLLAGE
@@ -108,7 +182,6 @@ export const StoreViewWeb = () => {
             config: {duration: 400}
         })
     )
-
     const handleCollageHoverIn = indexKey => {
         collageElementRefs.current[indexKey].current.classList.remove('hidden')
         collageDetailAnimationApi.start(i => i === indexKey && {
@@ -162,8 +235,8 @@ export const StoreViewWeb = () => {
     }, [sortState]);
 
     const contextValues = {
-        utilityState,
-        setUtilityState,
+        mobileUtilsState,
+        searchingState,
         storeSearchParams,
         setStoreSearchParams,
         storeHeadingText,
@@ -178,10 +251,12 @@ export const StoreViewWeb = () => {
         handleSortMenu,
         handleSearchOpen,
         handleSearchClose,
+        handleSearchingStart,
         handleFilterOpen,
         handleFilterClose,
-        sidebarRef,
-        sidebarAnimation,
+        searchModalRef,
+        searchbarRef,
+        searchbarAnimation,
         data,
         setData,
         indexCollageHover,
@@ -201,7 +276,8 @@ export const StoreViewWeb = () => {
             <StoreContext.Provider value={contextValues}>
                 <StoreNavbar/>
                 <div className="flex flex-row relative h-[85vh]">
-                    <StoreFilterbar/>
+                    <StoreFilterbar />
+                    <StoreSearchbar/>
                     <div className="basis-full md:basis-4/5 bg-gray-50 overflow-y-scroll">
                         <Suspense fallback={<LoadingView/>}>
                             <StoreContentCollage/>
@@ -210,6 +286,5 @@ export const StoreViewWeb = () => {
                 </div>
             </StoreContext.Provider>
         </>
-
     )
 }
