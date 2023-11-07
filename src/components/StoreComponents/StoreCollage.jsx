@@ -1,9 +1,8 @@
 import {PropTypes} from "prop-types";
-import {useState, useEffect, useRef, useContext} from "react";
-import {useSprings, animated} from "@react-spring/web";
-import StudentData from "../../lib/StudentData.jsx";
-import StoreContext from "../StoreContext.jsx";
-export const StoreContentCollage = () => {
+import {useRef, useContext} from "react";
+import {animated} from "@react-spring/web";
+import StoreContext from "./StoreContext.jsx";
+export const StoreCollage = () => {
     
     const {
         collageAnimation,
@@ -19,7 +18,7 @@ export const StoreContentCollage = () => {
             // eslint-disable-next-line react-hooks/rules-of-hooks
             collageElementRefs.current[index] = useRef(null)
             return (
-                <animated.div key={index} style={props} className="relative basis-2/5 lg:basis-[32%] mx-auto md:mx-0 my-auto bg-white aspect-[4/5] overflow-hidden hover:border-[1.5px] hover:border-black hover:scale-105 transition-scale hover:duration-300"
+                <animated.div key={index} style={props} className="relative basis-[45%] md:basis-2/5 lg:basis-[32%] mx-auto md:mx-0 w-full bg-white aspect-[4/5] overflow-hidden hover:scale-105 transition-scale hover:duration-300 shadow-sm shadow-zinc-400"
                               onMouseEnter={()=> handleCollageHoverIn(index)}
                               onMouseLeave={handleCollageHoverOut}>
                     <div className="w-full aspect-[4/3] overflow-hidden">
@@ -37,10 +36,10 @@ export const StoreContentCollage = () => {
 
                     <div className="absolute top-2/3 bottom-0 w-full flex flex-col">
                         <div className="basis-3/5 w-11/12 mx-auto">
-                            <h1 className="my-auto text-black font-bold">{data[index].names.lastName} {data[index].names.firstName}</h1>
+                            <h1 className="my-auto text-black font-bold text-sm md:text-base tracking-tight">{data[index].names.lastName} {data[index].names.firstName}</h1>
                         </div>
-                        <div className="basis-2/5 flex-none w-11/12 mx-auto">
-                            nsnfsn
+                        <div className="basis-2/5 flex-none w-11/12 mx-auto text-xs md:text-sm">
+                            Rp.69000
                         </div>
                     </div>
                 </animated.div>
@@ -57,6 +56,6 @@ export const StoreContentCollage = () => {
     )
 }
 
-StoreContentCollage.propTypes = {
+StoreCollage.propTypes = {
     sortState: PropTypes.string,
 }

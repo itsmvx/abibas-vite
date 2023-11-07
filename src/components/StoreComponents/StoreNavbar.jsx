@@ -1,7 +1,7 @@
 import {Link} from "react-router-dom";
 import {animated} from "@react-spring/web";
 import {useContext,useState} from "react";
-import StoreContext from "../StoreContext.jsx";
+import StoreContext from "./StoreContext.jsx";
 
 export const StoreNavbar = () => {
     const {
@@ -18,69 +18,67 @@ export const StoreNavbar = () => {
         searchModalRef,
         searchingState,
     } = useContext(StoreContext)
-    const [isSearch, setIsSearch] = useState(false)
+    let onTyping
     const handleInput = event => {
+        console.log(event.target.value)
         if (event.target.value === ''){
-            searchModalRef.current.classList.add('hidden')
-            setIsSearch(false)
-        }
-        else{
-            setIsSearch(true)
             handleSearchingStart(event.target.value)
         }
-
+        else{
+            handleSearchingStart(event.target.value)
+        }
     }
-    const searchModalElement = () => {
+
+    const SearchModalElement = () => {
         return (
             <>
                 {/*SEARCH RESULT MODAL*/}
                 <div ref={searchModalRef}
-                     className={`${isSearch ? 'h-auto' : 'h-0' } absolute top-[150%] md:-left-[150%] lg:-left-[200%] -right-1/2 bg-white shadow-sm shadow-zinc-800 z-10 overflow-hidden transition-height ease-in-out duration-[400ms]`}>
+                     className="hidden md:block absolute top-[150%] md:-left-[150%] lg:-left-[200%] -right-1/2 bg-white shadow-sm shadow-zinc-800 z-10 overflow-hidden">
                     <div className="w-full h-full flex flex-row text-black">
-                        <div className="basis-2/5 flex flex-col">
-                            <div className="w-11/12 h-8 mx-auto select-none">
-                                <h1 className="font-bold md:text-lg lg:text-xl">
-                                    Categories
-                                </h1>
-                            </div>
-                            <ul className="w-11/12 mx-auto flex flex-col gap-y-0.5 text-neutral-900 font-semibold md:text-base lg:text-lg">
-                                <Link className="hover:text-black hover:font-bold " to="/store?category=orang">Orang</Link>
-                            </ul>
-                        </div>
-                        <div className="flex-1 flex flex-col bg-white">
-                            <div className="w-11/12 h-8 mx-auto select-none">
-                                <h1 className="font-bold md:text-lg lg:text-xl">
-                                    Product
-                                </h1>
-                            </div>
-                            <ul className="w-11/12 mx-auto flex flex-col pb-5 gap-y-8 text-neutral-900 font-semibold md:text-base lg:text-lg">
-                                {searchingState.searchData.length === 0 && searchingState.isSearching
-                                    ? (
-                                        <div className="w-10 h-10 border-2 border-black border-r-transparent animate-spin rounded-full mx-auto">
-
-                                        </div>
-                                    )
-                                    : searchingState.isNotFound ? (
-                                        <h1 className="py-8 text-base font-medium">
-                                            No Product found...
+                        { searchingState.isError
+                            ? <h1 className="py-8 text-base font-medium">Sorry..unexpected error occured</h1>
+                            :
+                            <>
+                                <div className="basis-2/5 flex flex-col">
+                                    <div className="w-11/12 h-8 mx-auto select-none">
+                                        <h1 className="font-bold md:text-lg lg:text-xl">
+                                            Categories
                                         </h1>
-                                    )
-                                        :(
-                                            searchingState.searchData.map((items, index)=>((
-                                                <Link key={index} to="/" className="grid grid-cols-6 gap-x-1 h-24 hover:bg-zinc-100 rounded-md">
-                                                    <div className="col-span-2 w-4/5 aspect-square flex items-center justify-center overflow-hidden">
-                                                        <img src="assets/20230830_153932.webp" className="w-auto h-full object-cover" alt=""/>
-                                                    </div>
-                                                    <div className="col-span-4">
-                                                        <h1 className="text-sm tracking-tight">Gender + Orang</h1>
-                                                        <h1 className="font-bold text-base text-blak tracking-wide">{items.name}</h1>
-                                                        <p className="text-sm tracking-tight">{items.price}</p>
-                                                    </div>
-                                                </Link>
-                                            )))
-                                        )}
-                            </ul>
-                        </div>
+                                    </div>
+                                    <ul className="w-11/12 mx-auto flex flex-col gap-y-0.5 text-neutral-900 font-semibold md:text-base lg:text-lg">
+                                        <Link className="hover:text-black hover:font-bold " to="/store?category=orang">Orang</Link>
+                                    </ul>
+                                </div>
+                                <div className="flex-1 flex flex-col bg-white">
+                                    <div className="w-11/12 h-8 mx-auto select-none">
+                                        <h1 className="font-bold md:text-lg lg:text-xl">
+                                            Product
+                                        </h1>
+                                    </div>
+                                    <ul className="w-11/12 mx-auto flex flex-col pb-5 gap-y-8 text-neutral-900 font-semibold md:text-base lg:text-lg">
+                                        {searchingState.searchData.map((items, index) => ((
+                                            <Link key={index} to="/"
+                                                  className="grid grid-cols-6 gap-x-1 h-24 hover:bg-zinc-100 rounded-md">
+                                                <div
+                                                    className="col-span-2 w-4/5 aspect-square flex items-center justify-center overflow-hidden">
+                                                    <img src={`http://192.168.0.150:8000/api/assets/${items.imgPath.img1}`}
+                                                         onError={(e) => {
+                                                             e.target.onerror = null
+                                                             e.target.src = "assets/20230830_153932.webp"
+                                                         }} className="w-auto h-full object-cover" alt=""/>
+                                                </div>
+                                                <div className="col-span-4">
+                                                    <h1 className="text-sm tracking-tight">Gender + Orang</h1>
+                                                    <h1 className="font-bold text-base text-blak tracking-wide">{items.name}</h1>
+                                                    <p className="text-sm tracking-tight">{items.price}</p>
+                                                </div>
+                                            </Link>
+                                        )))}
+                                    </ul>
+                                </div>
+                            </>
+                        }
                     </div>
                 </div>
                 {/*SEARCH RESULT BOX*/}
@@ -89,12 +87,21 @@ export const StoreNavbar = () => {
     }
     return (
         <>
-            <div className="w-[95%] h-[15vh] mx-auto flex flex-row justify-between items-end border-b-2 border-zinc-400">
+            <div className="w-[95%] h-[10vh] md:h-[15vh] mx-auto flex flex-row justify-between items-end border-b-2 border-zinc-400">
                 <h1 className="text-4xl mb-5 font-semibold uppercase ">{storeHeadingText}</h1>
                 <div className="text-zinc-600 mb-2 flex justify-end gap-x-5">
                     <div className="relative hidden md:block w-4/5 h-4/5 z-20 bg-white">
                         <input
-                            onChange={handleInput}
+                            onChange={(e)=>{
+                                if( e.target.value === '') {
+                                    handleInput(e)
+                                }else {
+                                    clearTimeout(onTyping)
+                                    onTyping = setTimeout(()=>{
+                                        handleInput(e)
+                                    },1500)
+                                }
+                            }}
                             type="text"
                             className="w-full indent-1 outline-none border-b-[1.5px] border-zinc-800 relative"
                             placeholder="Search.."
@@ -102,7 +109,7 @@ export const StoreNavbar = () => {
                         <button className="absolute left-[90%]">
                             <i className=" bi bi-x"></i>
                         </button>
-                        {searchModalElement()}
+                        {searchingState.isSearching ? <SearchModalElement/>  : <></>}
                     </div>
                     <button value="search" onClick={handleSearchOpen} disabled={mobileUtilsState.search || mobileUtilsState.filter}
                         className={`${mobileUtilsState.search || mobileUtilsState.filter ? 'opacity-50 cursor-no-drop' : 'opacity-100 cursor-pointer'} 

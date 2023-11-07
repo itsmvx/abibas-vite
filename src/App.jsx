@@ -4,7 +4,7 @@ import {ErrorPage} from "./pages/ErrorPage.jsx";
 import {HomePage} from "./pages/HomePage.jsx";
 import {StorePage} from "./pages/StorePage.jsx";
 import './App.css'
-import {StoreContentCollage} from "./components/StoreFragments/StoreContentCollage.jsx";
+import {StoreCollage} from "./components/StoreComponents/StoreCollage.jsx";
 import {LoginPage} from "./pages/LoginPage.jsx";
 import {AdminPage} from "./pages/AdminPage.jsx";
 

@@ -1,19 +1,17 @@
-import {HomeNavbar} from "../components/HomeFragments/HomeNavbar.jsx";
-import {BrowserView, MobileView} from "react-device-detect";
+import {HomeNavbar} from "../components/HomeComponents/HomeNavbar.jsx";
 import {HomeViewWeb} from "../components/HomeViewWeb.jsx";
-import {HomeViewMobile} from "../components/HomeViewMobile.jsx";
+import {useEffect} from "react";
 
 export const HomePage = () => {
+    useEffect(() => {
+        return ()=>{
+            document.title = 'Abibas : Home'
+        }
+    }, []);
     return (
         <>
             <HomeNavbar/>
-
-            <BrowserView>
-                <HomeViewWeb/>
-            </BrowserView>
-            <MobileView>
-                <HomeViewMobile/>
-            </MobileView>
+            <HomeViewWeb/>
         </>
     )
 }

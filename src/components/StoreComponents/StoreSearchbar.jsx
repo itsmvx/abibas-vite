@@ -1,6 +1,6 @@
 import {animated} from "@react-spring/web";
 import { useContext} from "react";
-import storeContext from "../StoreContext.jsx";
+import storeContext from "./StoreContext.jsx";
 
 export const StoreSearchbar = () => {
     const {
@@ -10,7 +10,7 @@ export const StoreSearchbar = () => {
     } = useContext(storeContext)
     return (
         <>
-            <animated.div ref={searchbarRef} style={searchbarAnimation} className="hidden fixed top-[15.1vh] bottom-0 left-0 w-full h-full bg-white overflow-hidden z-20">
+            <animated.div ref={searchbarRef} style={searchbarAnimation} className="hidden fixed top-[10vh] md:top-[15.1vh] left-0 w-full min-h-screen bg-white overflow-y-scroll z-20">
                 <button onClick={handleSearchClose}
                     className="absolute flex items-center justify-center top-1 right-3 text-base">
                     Close <i className="bi bi-x text-3xl"></i>
