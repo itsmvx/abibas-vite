@@ -12,7 +12,7 @@ import {StoreCollage} from "../components/StoreComponents/StoreCollage.jsx";
 
 export const StorePage = () => {
 
-    let ubedzApi = 'http://192.168.0.150:8000'
+    let ubedzApi = 'http://127.0.0.1:8000'
     // <--> STORE Universal <---> //
     const [mobileUtilsState, setMobileUtilsState] = useState({
         filter: false,
@@ -24,56 +24,93 @@ export const StorePage = () => {
     const [storeHeadingText, setStoreHeadingText] = useState('')
     const [searchingState, setSearchingState] = useState({
         isSearching: false,
+        isCanceled: false,
         isNotFound: false,
         isError: false,
+        searchValue: '',
         searchData: [],
     })
-    const handleSearchingStart = searchValue => {
-        const searchVal = searchValue
+    const handleSearchingStart = async (searchValue) => {
+        const searchVal = searchValue.target.value
         if (searchVal === '') {
             setSearchingState({
                 isSearching: false,
+                isCanceled: false,
                 isNotFound: false,
                 isError: false,
+                searchValue: '',
+                searchData: [],
+            })
+        } else {
+            setSearchingState({
+                isSearching: true,
+                isCanceled: false,
+                isNotFound: false,
+                isError: false,
+                searchValue: searchVal,
                 searchData: [],
             })
         }
-        else {
-            setSearchingState({
-                isSearching: true,
-                isNotFound: false,
-                isError: false,
-                searchData: [],
-            })
-            axios
-                .get(ubedzApi + '/api/search-products', {
+    }
+    const handleSearchingCancel = () => {
+        setSearchingState({
+            isSearching: false,
+            isCanceled: true,
+            isNotFound: false,
+            isError: false,
+            searchValue: '',
+            searchData: [],
+        })
+    }
+    useEffect(() => {
+        const axiosAbortController = new AbortController();
+        const fetchSearchRequest = async searchVal => {
+            try {
+                const response
+                    = await axios.get(ubedzApi + '/api/search-products', {
                     params: {
                         search: searchVal,
                     },
-                    timeout: 8000,
-                })
-                .then((response) => {
-                    response.data.data.length === 0
-                        ? setSearchingState(prevState => ({
-                            ...prevState,
-                            isNotFound: true
-                        }))
-                        : setSearchingState((prevState) => ({
-                            ...prevState,
-                            searchData: response.data.data,
-                        }))
-                })
-                .catch((error) => {
-                    console.error("Error fetching data:", error);
-                    setSearchingState({
+                    signal: axiosAbortController.signal,
+                    timeout: 6000,
+                });
+                const resSeriesIsEmpty = response.data.data.series.length === 0
+                const resProductsIsEmpty = response.data.data.products.length === 0
+                if (resSeriesIsEmpty && resProductsIsEmpty) {
+                    setSearchingState((prevState) => ({
+                        ...prevState,
+                        isNotFound: true,
+                    }));
+                } else {
+                    setSearchingState((prevState) => ({
+                        ...prevState,
+                        searchData: response.data.data,
+                    }));
+                }
+            } catch (error) {
+                if (!axios.isCancel(error)) {
+                    console.error('Error fetching data', error);
+                    setSearchingState((prevState) => ({
+                        ...prevState,
                         isSearching: false,
                         isNotFound: false,
                         isError: true,
+                        searchValue: '',
                         searchData: [],
-                    })
-                })
+                    }));
+                }
+            }
+        };
+
+        if (searchingState.isSearching && !searchingState.isCanceled) {
+            fetchSearchRequest(searchingState.searchValue);
         }
-    }
+
+        return () => {
+            axiosAbortController.abort()
+        }
+    }, [searchingState.isSearching, searchingState.isCanceled, searchingState.searchValue]);
+
 
     useEffect(() => {
         let headingText
@@ -89,13 +126,14 @@ export const StorePage = () => {
     }, [storeSearchParams]);
     // <--> END OF STORE Universal <--> //
 
-    //STORE SEARCH
+    // <--> STORE SEARCH <--> //
     const searchbarRef = useRef(null)
     const [searchbarAnimation, searchbarAnimationApi] = useSpring(()=>({
         from: {x: 0},
         to: {x: 0},
         config: {duration: 500},
     }))
+    // <--> END OF STORE SEARCH <--> //
 
     // <--> STORE NAVBAR <--> //
     const [isSortMenuOpen, setIsSortMenuOpen] = useState(false)
@@ -106,7 +144,7 @@ export const StorePage = () => {
             to: {y: 0},
             config: {duration: 300}
         })
-    )
+    ,[isSortMenuOpen])
     const handleSort = sort => {
         setSortState(sort)
         setIsSortMenuOpen(false)
@@ -119,94 +157,9 @@ export const StorePage = () => {
             config: {duration: 150}
         }))
     }
-    const handleSearchOpen = () => {
-        setMobileUtilsState(prevState => ({
-            ...prevState,
-            search: true
-        }))
-        searchbarAnimationApi.start({
-            from: {x: 1000},
-            to: {x: 0},
-            config: {duration: 400},
-            onStart: ()=>{
-                searchbarRef.current.classList.remove('hidden')
-                searchbarRef.current.classList.add('block')
-            }
-        })
-    }
-    const handleSearchClose = () => {
-        setMobileUtilsState(prevState => ({
-            ...prevState,
-            search: false,
-        }))
-        searchbarAnimationApi.start({
-            from: {x: 0},
-            to: {x: 1000},
-            config: {duration: 400},
-            onRest: ()=>{
-                searchbarRef.current.classList.add('hidden')
-                searchbarRef.current.classList.add('block')
-            }
-        })
-    }
-    const handleFilterOpen = () => {
-        setMobileUtilsState(prevState => ({
-            ...prevState,
-            filter: true
-        }))
-    }
-    const handleFilterClose = () => {
-        setMobileUtilsState(prevState => ({
-            ...prevState,
-            filter: false,
-        }))
-    }
-
-    // STORE COLLAGE
-    const [data, setData] = useState(StudentData.slice(0, 20))
-    const [indexCollageHover, setIndexCollageHover] = useState(-1)
-    const collageElementRefs = useRef([])
-    const [collageAnimation, collageAnimationApi] = useSprings(
-        data.length,
-        () => ({
-            from: {filter: 'contrast(30%)'},
-            to: {filter: 'contrast(100%)'},
-            config: {duration: 550}
-        }),
-        [data, sortState]
-    )
-    const [collageDetailAnimation, collageDetailAnimationApi] = useSprings(
-        data.length,
-        () => ({
-            from: {opacity: 0},
-            to: {opacity: 1},
-            config: {duration: 400}
-        })
-    )
-    const handleCollageHoverIn = indexKey => {
-        collageElementRefs.current[indexKey].current.classList.remove('hidden')
-        collageDetailAnimationApi.start(i => i === indexKey && {
-            from: {opacity: 0, y: 300},
-            to: {opacity: 1, y: 0},
-            config: {duration: 250}
-        })
-        setIndexCollageHover(indexKey);
-    }
-    const handleCollageHoverOut = () => {
-        setTimeout(() => {
-            collageElementRefs.current[indexCollageHover].current.classList.add('hidden')
-        }, 180)
-
-        collageDetailAnimationApi.start(i => i === indexCollageHover && {
-            from: {y: 0},
-            to: {y: 300},
-            config: {duration: 200}
-        })
-        setIndexCollageHover(-1)
-    }
     useEffect(() => {
         const sortData = () => {
-            const newData = [...data]
+            const newData = [...collageData]
             switch (sortState) {
                 case 'ascending' :
                     newData.sort((a, b) => a.names.lastName < b.names.lastName ? -1 : 1)
@@ -225,21 +178,158 @@ export const StorePage = () => {
                     break
             }
             collageAnimationApi.start({
-                from: {filter: 'contrast(30%)'},
-                to: {filter: 'contrast(100%)'},
-                config: {duration: 550}
+                from: {opacity: 0, filter: 'contrast(50%)'},
+                to: {opacity: 1, filter: 'contrast(100%)'},
+                config: {duration: 700},
             });
-            setData(newData)
+            setCollageData(newData)
         }
         sortData()
     }, [sortState]);
+    const handleSearchOpen = () => {
+        setMobileUtilsState(prevState => ({
+            ...prevState,
+            search: true
+        }))
+        searchbarAnimationApi.start({
+            from: {x: 1000},
+            to: {x: 0},
+            config: {duration: 400},
+            onStart: ()=>{
+                searchbarRef.current.classList.remove('hidden')
+            }
+        })
+    }
+    const handleSearchClose = () => {
+        setMobileUtilsState(prevState => ({
+            ...prevState,
+            search: false,
+        }))
+        searchbarAnimationApi.start({
+            from: {x: 0},
+            to: {x: 1000},
+            config: {duration: 400},
+            onRest: ()=>{
+                searchbarRef.current.classList.add('hidden')
+            }
+        })
+    }
+    const handleFilterOpen = () => {
+        setMobileUtilsState(prevState => ({
+            ...prevState,
+            filter: true
+        }))
+    }
+    const handleFilterClose = () => {
+        setMobileUtilsState(prevState => ({
+            ...prevState,
+            filter: false,
+        }))
+    }
+
+    // <--> FILTER SERIES FEED -->
+    const [seriesFeedState, setSeriesFeedState] = useState({
+        isLoading: true,
+        isError: false
+    })
+    const [seriesFeedData, setSeriesFeedData] = useState(
+        localStorage.getItem('storeSeriesFeed')
+            ? JSON.parse(localStorage.getItem('storeSeriesFeed'))
+            : []
+    )
+    // <--> END OF FILTER SERIES FEED -->
+
+    // <--> STORE COLLAGE <--> //
+    const [collageState, setCollageState] = useState({
+        isLoading: true,
+        isError: false,
+    })
+    const [collageData, setCollageData] = useState(
+        localStorage.getItem('storeProductsData')
+            ? JSON.parse(localStorage.getItem('storeProductsData'))
+            : []
+    )
+    const [collageAnimation, collageAnimationApi]
+        = useSprings(
+        collageData.length,
+        () => ({
+            from: { opacity: 0, transform: 'scale(0.95)' },
+            to: { opacity: 1, transform: 'scale(1)' },
+            config: {duration: 300}
+        }),
+        [collageData]
+    )
+    const [collageDetailAnimation, collageDetailAnimationApi]
+        = useSprings(
+        collageAnimation.length,
+        () => ({
+            transform: 'translateY(0%)',
+            config: {duration: 210},
+        }),
+        [collageAnimation]
+    )
+    const handleCollageHoverIn = indexKey => {
+        collageDetailAnimationApi.start(i => i === indexKey && {
+            transform: 'translateY(-40.5%)',
+            config: {duration: 210},
+        })
+    }
+    const handleCollageHoverOut = indexKey => {
+        collageDetailAnimationApi.start(i => i === indexKey && {
+            transform: 'translateY(100%)',
+            config: {duration: 210},
+        })
+    }
     useEffect(() => {
-        document.title = 'Abibas : Store'
+        document.title = 'Abibas : Store';
+        const fetchSeriesFeed = async () => {
+            try {
+                const response
+                = await axios.get(ubedzApi + '/api/latest-series')
+
+                setSeriesFeedState({
+                    isLoading: false,
+                    isError: false,
+                })
+                setSeriesFeedData(response.data.data)
+                localStorage.setItem('storeSeriesFeed', JSON.stringify(response.data.data))
+            }catch (error){
+                setSeriesFeedState({
+                    isLoading: true,
+                    isError: true,
+                })
+            }
+        }
+        const fetchCollageData = async () => {
+            try {
+                const response
+                    = await axios.get(ubedzApi + '/api/products', {
+                    timeout: 6000,
+                })
+                setCollageState({
+                    isLoading: false,
+                    isError: false,
+                })
+                setCollageData(response.data.data)
+                localStorage.setItem('storeProductsData', JSON.stringify(response.data.data))
+            } catch (error) {
+                setCollageState({
+                    isLoading: false,
+                    isError: true,
+                })
+                setCollageData(StudentData.slice(0, 20))
+                localStorage.setItem('storeProductsData', JSON.stringify(StudentData.slice(0,40)))
+            }
+        }
+        collageData.length === 0 && fetchCollageData()
+        seriesFeedData.length === 0 && fetchSeriesFeed()
     }, []);
 
+    // <--> END OF STORE COLLAGE <--> //
+
     const contextValues = {
+        ubedzApi,
         mobileUtilsState,
-        searchingState,
         storeSearchParams,
         setStoreSearchParams,
         storeHeadingText,
@@ -255,16 +345,19 @@ export const StorePage = () => {
         handleSearchOpen,
         handleSearchClose,
         handleSearchingStart,
+        handleSearchingCancel,
         handleFilterOpen,
         handleFilterClose,
+        searchingState,
+        setSearchingState,
         searchModalRef,
         searchbarRef,
         searchbarAnimation,
-        data,
-        setData,
-        indexCollageHover,
-        setIndexCollageHover,
-        collageElementRefs,
+        seriesFeedState,
+        seriesFeedData,
+        collageState,
+        setCollageState,
+        collageData,
         collageAnimation,
         collageAnimationApi,
         collageDetailAnimation,
@@ -272,8 +365,6 @@ export const StorePage = () => {
         handleCollageHoverIn,
         handleCollageHoverOut,
     }
-
-
     return (
         <>
             <StoreContext.Provider value={contextValues}>

@@ -1,61 +1,137 @@
-import {PropTypes} from "prop-types";
-import {useRef, useContext} from "react";
+import {memo, useContext, useMemo} from "react";
 import {animated} from "@react-spring/web";
 import StoreContext from "./StoreContext.jsx";
-export const StoreCollage = () => {
-    
+import {LoadingView} from "../../Utils/LoadingView.jsx";
+export const StoreCollage = memo(() => {
     const {
         collageAnimation,
         collageDetailAnimation,
         handleCollageHoverIn,
         handleCollageHoverOut,
-        data,
-        collageElementRefs,
+        collageState,
+        collageData,
+        ubedzApi,
     } = useContext(StoreContext)
+    const DefaultCollage = () => {
+        return <>
+            {
+                collageAnimation.map((props,index) => {
+                    return (
+                        <animated.div key={index} style={props}
+                                      className="relative basis-[45%] md:basis-2/5 lg:basis-[32%] mx-auto md:mx-0
+                                      w-full bg-white aspect-[4/5] overflow-hidden shadow-sm shadow-zinc-400 scale-125"
+                                      onMouseEnter={()=> handleCollageHoverIn(index)}
+                                      onMouseLeave={()=> handleCollageHoverOut(index)}>
+                            <div className="w-full aspect-[4/3] overflow-hidden">
+                                <img src={collageData[index].photoUrl}
+                                     className="w-full h-full object-cover" alt=".." loading="lazy"/>
+                            </div>
+                            <animated.div
+                                style={collageDetailAnimation[index]}
+                                className="absolute top-full bottom-0 w-full h-full z-10 overflow-hidden"
+                            >
+                                <div className="w-full h-full mx-auto bg-fuchsia-400 flex justify-center">
 
-    const defaultCollage = () => {
-        return collageAnimation.map((props,index) => {
-            // eslint-disable-next-line react-hooks/rules-of-hooks
-            collageElementRefs.current[index] = useRef(null)
-            return (
-                <animated.div key={index} style={props} className="relative basis-[45%] md:basis-2/5 lg:basis-[32%] mx-auto md:mx-0 w-full bg-white aspect-[4/5] overflow-hidden hover:scale-105 transition-scale hover:duration-300 shadow-sm shadow-zinc-400"
-                              onMouseEnter={()=> handleCollageHoverIn(index)}
-                              onMouseLeave={handleCollageHoverOut}>
-                    <div className="w-full aspect-[4/3] overflow-hidden">
-                        <img src={data[index].photoUrl} className="w-full h-full object-cover" alt=".."/>
-                    </div>
-                    <animated.div
-                        style={collageDetailAnimation[index]}
-                        ref={collageElementRefs.current[index]}
-                        className="absolute hidden top-[59.5%] bottom-0 w-full h-full z-10 overflow-hidden"
-                    >
-                        <div className="w-full h-full mx-auto bg-fuchsia-400 flex justify-center">
+                                </div>
+                            </animated.div>
 
-                        </div>
-                    </animated.div>
+                            <div className="absolute top-2/3 bottom-0 w-full flex flex-col">
+                                <div className="basis-3/5 w-11/12 mx-auto">
+                                    <h1 className="uppercase my-auto text-black font-bold text-sm md:text-base tracking-tight">{collageData[index].names.lastName} {collageData[index].names.firstName}</h1>
+                                </div>
+                                <div className="basis-2/5 flex-none w-11/12 mx-auto text-xs md:text-sm">
+                                    Rp.69000
+                                </div>
+                            </div>
+                        </animated.div>
+                    )
+             })}
+        </>
+    }
+    const FetchedCollage = () => {
+        return <>
+            {
+                collageAnimation.map((props,index) => {
+                    return (
+                        <animated.div key={index} style={props}
+                                      className="relative basis-[45%] md:basis-2/5 lg:basis-[32%] mx-auto md:mx-0
+                                      w-full bg-white aspect-[3/4] overflow-hidden shadow-sm shadow-zinc-400 scale-125"
+                                      onMouseEnter={()=> handleCollageHoverIn(index)}
+                                      onMouseLeave={()=> handleCollageHoverOut(index)}
+                        >
+                            <div className="w-full aspect-square overflow-hidden">
+                                <img src={ubedzApi + '/assets/' + collageData[index].imgPath.img1}
+                                     className="w-full h-full object-cover" alt=".." loading="lazy"/>
+                            </div>
+                            <animated.div
+                                style={collageDetailAnimation[index]}
+                                className="absolute top-full bottom-0 w-full h-full z-10 overflow-hidden"
+                            >
+                                <div className="w-full h-full bg-zinc-50">
+                                    <div className="mx-auto w-11/12 flex flex-col gap-y-3">
+                                        <div className="mt-2 basis-1/2">
+                                            <h1 className="text-sm font-semibold">Size Available</h1>
+                                            <div className="flex flex-row gap-x-2">
+                                                {
+                                                    collageData[index].specs.size.split(',').map((items, index) => ((
+                                                        <div key={index} className="min-w-[2.5rem] w-auto p-1 mt-0.5 capitalize text-sm flex items-center justify-center rounded-md border-[1px] border-black">
+                                                            {items}
+                                                        </div>
+                                                    )))
+                                                }
+                                            </div>
+                                        </div>
+                                        <div className="basis-1/2">
+                                            <h1 className="text-sm font-semibold">Colors</h1>
+                                            <div className="flex flex-row gap-x-1.5">
+                                                {
+                                                    collageData[index].specs.color.split(',').map((items, index) => ((
+                                                        <div key={index} className="w-auto p-1 mt-0.5 capitalize text-sm flex items-center justify-center rounded-md border-[1px] border-black">
+                                                            {items}
+                                                        </div>
+                                                    )))
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </animated.div>
 
-                    <div className="absolute top-2/3 bottom-0 w-full flex flex-col">
-                        <div className="basis-3/5 w-11/12 mx-auto">
-                            <h1 className="my-auto text-black font-bold text-sm md:text-base tracking-tight">{data[index].names.lastName} {data[index].names.firstName}</h1>
-                        </div>
-                        <div className="basis-2/5 flex-none w-11/12 mx-auto text-xs md:text-sm">
-                            Rp.69000
-                        </div>
-                    </div>
-                </animated.div>
-            )
-        })
+                            <div className="absolute top-[80%] bottom-0 w-full flex flex-col">
+                                <div className="basis-1/5 w-11/12 mx-auto">
+                                    <p className="text-[11px] capitalize font-medium text-zinc-600">
+                                        {collageData[index].gender} {collageData[index].subCategory}
+                                    </p>
+                                </div>
+                                <div className="basis-2/5 w-11/12 mx-auto">
+                                    <h1 className="uppercase my-auto text-black font-semibold text-sm md:text-base tracking-tight">
+                                        {collageData[index].name}
+                                    </h1>
+                                </div>
+                                <div className="basis-2/5 flex-none w-11/12 mx-auto text-xs md:text-sm">
+                                    Rp.{collageData[index].price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
+                                </div>
+                            </div>
+                        </animated.div>
+                    )
+             })}
+        </>
     }
 
     return (
         <>
             <div className="w-[97%] h-full mt-3.5 flex flex-row flex-wrap items-start justify-start md:justify-center lg:justify-start gap-y-6 gap-3 md:gap-y-6 md:gap-x-10 lg:gap-y-10 lg:gap-x-4 mx-auto">
-                {defaultCollage()}
+                {
+                    collageState.isLoading && !collageState.isError && collageData.length === 0
+                        ? <LoadingView />
+                        : collageState.isError && !collageState.isLoading
+                                ? <></>
+                                : !collageState.isError && collageData.length !== 0
+                                    && <FetchedCollage/>
+                }
+
             </div>
         </>
     )
-}
-
-StoreCollage.propTypes = {
-    sortState: PropTypes.string,
-}
+})
+StoreCollage.displayName = 'StoreCollage';
