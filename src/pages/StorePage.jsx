@@ -162,19 +162,19 @@ export const StorePage = () => {
             const newData = [...collageData]
             switch (sortState) {
                 case 'ascending' :
-                    newData.sort((a, b) => a.names.lastName < b.names.lastName ? -1 : 1)
+                    newData.sort((a, b) => a.name < b.name ? -1 : 1)
                     break
                 case 'descending' :
-                    newData.sort((a, b) => a.names.lastName > b.names.lastName ? -1 : 1)
+                    newData.sort((a, b) => a.name > b.name ? -1 : 1)
                     break
                 case 'cheap' :
-                    newData.sort((a, b) => a.birthday < b.birthday ? -1 : 1)
+                    newData.sort((a, b) => a.price < b.price ? -1 : 1)
                     break
                 case 'expensive' :
-                    newData.sort((a, b) => a.age < b.age ? -1 : 1)
+                    newData.sort((a, b) => a.price > b.price ? -1 : 1)
                     break
                 default :
-                    newData.sort((a, b) => a.school < b.school ? -1 : 1)
+                    newData.sort((a, b) => a.idProduk > b.idProduk ? -1 : 1)
                     break
             }
             collageAnimationApi.start({
@@ -243,6 +243,9 @@ export const StorePage = () => {
     const [collageState, setCollageState] = useState({
         isLoading: true,
         isError: false,
+        lastUpdate: localStorage.getItem('storeLastUpdate')
+            ? JSON.parse(localStorage.getItem('storeLastUpdate'))
+            : ''
     })
     const [collageData, setCollageData] = useState(
         localStorage.getItem('storeProductsData')
@@ -282,6 +285,27 @@ export const StorePage = () => {
     }
     useEffect(() => {
         document.title = 'Abibas : Store';
+        const fetchStoreUpdate = async () => {
+            try {
+                const response
+                = await  axios.get(ubedzApi + '/api/store-update')
+
+                setCollageState({
+                    isLoading: false,
+                    isError: false,
+                    lastUpdate: response
+                })
+                localStorage.setItem('storeLastUpdate', JSON.stringify(response))
+            }
+            catch (error){
+                setCollageState({
+                    isLoading: true,
+                    isError: true,
+                    lastUpdate: '1970-01-01 00:00:00'
+                })
+                localStorage.removeItem('storeLastUpdate')
+            }
+        }
         const fetchSeriesFeed = async () => {
             try {
                 const response
@@ -318,9 +342,10 @@ export const StorePage = () => {
                     isError: true,
                 })
                 setCollageData(StudentData.slice(0, 20))
-                localStorage.setItem('storeProductsData', JSON.stringify(StudentData.slice(0,40)))
+                localStorage.removeItem('storeProductsData')
             }
         }
+        fetchStoreUpdate().catch(()=>console.log)
         collageData.length === 0 && fetchCollageData()
         seriesFeedData.length === 0 && fetchSeriesFeed()
     }, []);

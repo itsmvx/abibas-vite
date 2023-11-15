@@ -1,13 +1,14 @@
 import React from "react";
 import {createBrowserRouter, RouterProvider} from "react-router-dom";
-import {ErrorPage} from "./pages/ErrorPage.jsx";
-import {HomePage} from "./pages/HomePage.jsx";
-import {StorePage} from "./pages/StorePage.jsx";
+
 import './App.css'
 import {StoreCollage} from "./components/StoreComponents/StoreCollage.jsx";
 import {LoginPage} from "./pages/LoginPage.jsx";
 import {AdminPage} from "./pages/AdminPage.jsx";
-
+import {NotFoundPage} from "./pages/NotFoundPage.jsx";
+import {HomePage} from "./pages/HomePage.jsx";
+import {StorePage} from "./pages/StorePage.jsx";
+import {ErrorPage} from "./pages/ErrorPage.jsx"
 function App() {
   const router = createBrowserRouter([
     {
@@ -21,6 +22,7 @@ function App() {
     {
       path: "/store",
       element: <StorePage/>,
+      errorElement: <ErrorPage/>
     },
     {
       path: "/admin/dashboard",
@@ -28,7 +30,7 @@ function App() {
     },
     {
       path: "*",
-      element: <ErrorPage/>
+      element: <NotFoundPage/>
     }
   ]);
 
