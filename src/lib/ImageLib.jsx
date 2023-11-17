@@ -15,7 +15,7 @@ import AronaPlana1P from "/assets/20230909_213827.webp"
 import HaloFest1L from "/assets/36e1064e4ded68c9017a024cfe408dad.webp"
 import HaloFest2L from "/assets/6df6a8e49e15bd7dc8a343a567ca59f3.webp"
 import AbibasLogo from "/assets/abibas-logo.webp"
-export const ImagesAll = {
+export const ImagesAll = [
     Haruna1L,
     Haruna2L,
     Haruna3L,
@@ -32,7 +32,7 @@ export const ImagesAll = {
     AronaPlana1P,
     HaloFest1L,
     HaloFest2L,
-}
+]
 
 export {
     AbibasLogo,
