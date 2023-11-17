@@ -15,11 +15,13 @@ export const ErrorPage = () => {
         const timeout = setTimeout(()=>{
             setErrorTimeout(errorTimeout - 1)
         },1000)
+        localStorage.removeItem('storeProductsData')
+        localStorage.removeItem('storeSeriesFeed')
         return ()=> clearTimeout(timeout)
     }, []);
     return (
         <>
-            <main className="w-screen h-screen flex flex-col items-center justify-end gap-y-10  bg-[url('/assets/haruna-banner.webp')] bg-center bg-fixed bg-cover">
+            <main className="w-screen h-screen flex flex-col items-center justify-end gap-y-10 bg-[url('/assets/haruna-banner.webp')] bg-center bg-fixed bg-cover">
                 <h1 className="-ml-5 text-3xl font-bold select-none">
                     An Error Occured
                 </h1>
