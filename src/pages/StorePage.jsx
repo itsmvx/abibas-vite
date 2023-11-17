@@ -18,13 +18,7 @@ export const StorePage = () => {
         filter: false,
         search: false,
     })
-    let [storeSearchParams, setStoreSearchParams] = useSearchParams({
-        categories: '',
-        gender: '',
-        minPrice: 0,
-        maxPrice: 0,
-    })
-    const [storeHeadingText, setStoreHeadingText] = useState('')
+
     const searchingAction = {
         start: 'start',
         cancel: 'cancel',
@@ -131,7 +125,46 @@ export const StorePage = () => {
         }
     }, [searchingState.isSearching, searchingState.isCanceled, searchingState.searchValue]);
 
-
+    const searchParamsAction = {
+        categories: "categories",
+        gender: "gender",
+        price: "price"
+    }
+    let [storeSearchParams, setStoreSearchParams] = useSearchParams({})
+    const handleChangeSearchParams = (action) => {
+        switch (action.type) {
+            case searchParamsAction.categories:
+                storeSearchParams.set("categories", action.payload)
+                break
+            case searchParamsAction.gender:
+                storeSearchParams.set("gender", action.payload)
+                break
+            case searchParamsAction.price:
+                storeSearchParams.set("min", action.payload.min)
+                storeSearchParams.set("max", action.payload.max)
+                break
+        }
+        setStoreSearchParams(storeSearchParams)
+    }
+    const handleDeleteSearchParams = (action) => {
+        switch (action.type) {
+            case searchParamsAction.categories:
+                storeSearchParams.delete("categories")
+                break
+            case searchParamsAction.gender:
+                storeSearchParams.delete("gender")
+                break
+            case searchParamsAction.price:
+                storeSearchParams.delete("min")
+                storeSearchParams.delete("max")
+                break
+        }
+        setStoreSearchParams(storeSearchParams)
+    }
+    useEffect(() => {
+        setStoreSearchParams(storeSearchParams)
+    }, [storeSearchParams]);
+    const [storeHeadingText, setStoreHeadingText] = useState('')
     useEffect(() => {
         let headingText
         storeSearchParams.get('series')
@@ -253,8 +286,11 @@ export const StorePage = () => {
         productsFetchError: 'products-fetch-error',
         productsFetchSuccess: 'products-fetch-success',
         productsSortUpdate: 'products-sort-update',
+        productsFilterStart: 'products-search-start',
+        productsFilterResult: 'products-search-result',
+        productsFilterEnd: 'products-search-end',
         feedsFetchError: 'feeds-fetch-error',
-        feedsFetchSuccess: 'feeds-fetch-success'
+        feedsFetchSuccess: 'feeds-fetch-success',
     }
     const storeReducer = (state, action) => {
         switch (action.type){
@@ -269,22 +305,43 @@ export const StorePage = () => {
                     feedsLastUpdate: action.payload.lastUpdate,
                     feedsData: action.payload.feedsData
                 }
+            case storeAction.productsFetchStart:
+                return {
+                    ...state,
+                    isLoading: true
+                }
             case storeAction.productsFetchError:
                 return {
                     ...state,
-                    isError: true,
-                    productsData: StudentData.slice(0,40)
+                    productsData: StudentData.slice(0,40),
+                    isLoading: false
                 }
             case storeAction.productsFetchSuccess:
                 return {
                     ...state,
+                    productsData: action.payload,
                     isLoading: false,
-                    productsData: action.payload
                 }
             case storeAction.productsSortUpdate:
                 return {
                     ...state,
                     productsData: action.payload
+                }
+            case storeAction.productsFilterStart:
+                return {
+                    ...state,
+                    isFiltering: true,
+                }
+            case storeAction.productsFilterResult:
+                return {
+                    ...state,
+                    isFiltering: false,
+                    productsData: action.payload
+                }
+            case storeAction.productsFilterEnd:
+                return {
+                    ...state,
+                    isFiltering: false,
                 }
             default:
                 return state
@@ -293,15 +350,14 @@ export const StorePage = () => {
     const [storeState, storeDispatch] = useReducer(storeReducer, {
         isLoading: true,
         isError: false,
+        isFiltering: false,
         feedsLastUpdate: localStorage.getItem('storeFeedsUpdate')
             ? JSON.parse(localStorage.getItem('storeFeedsUpdate'))
             : '1970-01-01 00:00:00',
         feedsData: localStorage.getItem('storeFeedsData')
             ? JSON.parse(localStorage.getItem('storeFeedsData'))
             : [],
-        productsData: localStorage.getItem('storeProductsData')
-            ? JSON.parse(localStorage.getItem('storeProductsData'))
-            : []
+        productsData: StudentData.slice(0,40)
     })
     useEffect(() => {
         document.title = 'Abibas | Store';
@@ -351,9 +407,33 @@ export const StorePage = () => {
                 })
             fetchProductsData()
         }
+        storeDispatch({ type: storeAction.productsFetchStart })
         fetchStoreData()
-    }, []);
+    }, [])
 
+    useEffect(() => {
+        const fetchSearchProducts = async (searchParams) => {
+            try {
+                const response
+                    = await axios.get(import.meta.env.VITE_API_URL, '/products', {
+                    params: searchParams
+                })
+                storeDispatch({
+                    type: storeAction.productsFilterResult,
+                    payload: response.data.data
+                })
+            } catch (error) {
+                storeDispatch({type: storeAction.productsFilterEnd})
+            }
+            storeDispatch({type: storeAction.productsFilterEnd})
+        }
+        storeDispatch({type: storeAction.productsFilterStart})
+        const searchParams = {}
+        storeSearchParams.forEach((value, key) => {
+            searchParams[key] = value
+        })
+        fetchSearchProducts(searchParams)
+    }, [storeSearchParams])
 
     const [collageAnimation, collageAnimationApi]
         = useSprings(
@@ -392,6 +472,9 @@ export const StorePage = () => {
         mobileUtilsState,
         storeSearchParams,
         setStoreSearchParams,
+        searchParamsAction,
+        handleChangeSearchParams,
+        handleDeleteSearchParams,
         storeHeadingText,
         setStoreHeadingText,
         isSortMenuOpen,

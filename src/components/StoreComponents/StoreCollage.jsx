@@ -16,8 +16,7 @@ export const StoreCollage = memo(() => {
                 collageAnimation.map((props,index) => {
                     return (
                         <animated.div key={index} style={props}
-                                      className="relative basis-[45%] md:basis-2/5 lg:basis-[32%] mx-auto md:mx-0
-                                      w-full bg-white aspect-[4/5] overflow-hidden shadow-sm shadow-zinc-400 scale-125"
+                                      className={`${storeState.isFiltering ? 'contrast-50' : 'contrast-100'} relative basis-[45%] md:basis-2/5 lg:basis-[32%] mx-auto md:mx-0 w-full bg-white aspect-[4/5] overflow-hidden shadow-sm shadow-zinc-400 scale-125`}
                                       onMouseEnter={()=> handleCollageHoverIn(index)}
                                       onMouseLeave={()=> handleCollageHoverOut(index)}>
                             <div className="w-full aspect-[4/3] overflow-hidden">
@@ -54,13 +53,12 @@ export const StoreCollage = memo(() => {
                 collageAnimation.map((props,index) => {
                     return (
                         <animated.div key={index} style={props}
-                                      className="relative basis-[45%] md:basis-2/5 lg:basis-[32%] mx-auto md:mx-0
-                                      w-full bg-white aspect-[3/4] overflow-hidden shadow-sm shadow-zinc-400 scale-125"
+                                      className={`${storeState.isFiltering | storeState.isSearching ? 'contrast-50' : 'contrast-100'} relative basis-[45%] md:basis-2/5 lg:basis-[32%] mx-auto md:mx-0 w-full bg-white aspect-[3/4] overflow-hidden shadow-sm shadow-zinc-400 scale-125`}
                                       onMouseEnter={()=> handleCollageHoverIn(index)}
                                       onMouseLeave={()=> handleCollageHoverOut(index)}
                         >
                             <div className="w-full aspect-square overflow-hidden">
-                                <img src={import.meta.env.REST_API_URL + '/assets/' + storeState.storeState.productsData[index].imgPath.img1}
+                                <img src={import.meta.env.REST_API_URL + '/assets/' + storeState.productsData[index].imgPath.img1}
                                      className="w-full h-full object-cover" alt=".." loading="lazy"/>
                             </div>
                             <animated.div
@@ -122,13 +120,13 @@ export const StoreCollage = memo(() => {
         <>
             <div className="w-[97%] h-full mt-3.5 flex flex-row flex-wrap items-start justify-start md:justify-center lg:justify-start gap-y-6 gap-3 md:gap-y-6 md:gap-x-10 lg:gap-y-10 lg:gap-x-4 mx-auto">
                 {
-                    storeState.isLoading && !storeState.isError && storeState.productsData.length === 0
+                    storeState.isLoading || storeState.productsData.length === 0
                         ? <LoadingView />
-                        : storeState.isError && !storeState.isLoading
-                                ? <></>
+                        : storeState.isError && !storeState.isLoading && storeState.productsData.length !== 0
+                                ? <DefaultCollage/>
                                 : !storeState.isError && storeState.productsData.length !== 0
-                                    ? <FetchedCollage/>
-                                    : <DefaultCollage/>
+                                ? <FetchedCollage/>
+                                : <DefaultCollage/>
                 }
 
             </div>

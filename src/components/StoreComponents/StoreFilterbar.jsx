@@ -5,7 +5,9 @@ import StoreContext from "./StoreContext.jsx";
 export const StoreFilterbar = () => {
     const {
         storeState,
-        ubedzApi,
+        handleChangeSearchParams,
+        handleDeleteSearchParams,
+        searchParamsAction,
     } = useContext(StoreContext)
     const [filterOption, setFilterOption] = useState({
         categories: false,
@@ -22,10 +24,6 @@ export const StoreFilterbar = () => {
     })
     const filterRef = useRef(null)
     const handleFilter = event => {
-        setFilterOption(prevState => ({
-            ...prevState,
-
-        }))
         event.target.value === 'categories-option'
             ? setFilterOption(prevState=> ({
                 ...prevState,
@@ -37,7 +35,8 @@ export const StoreFilterbar = () => {
                     genders: !filterOption.genders,
 
                 }))
-                : setFilterOption(prevState => ({
+                : event.target.value === 'prices-option'
+                && setFilterOption(prevState => ({
                     ...prevState,
                     prices: !filterOption.prices,
                 }))
@@ -53,14 +52,34 @@ export const StoreFilterbar = () => {
         event.target.value === categoryFilterOption
             ? setCategoryFilterOption('all')
             : setCategoryFilterOption(event.target.value)
+        handleChangeSearchParams({
+            type: searchParamsAction.categories,
+            payload: event.target.value === 'all' ? '' : event.target.value
+        })
     }
+    useEffect(() => {
+        categoryFilterOption === 'all'
+            ? handleDeleteSearchParams({ type: searchParamsAction.categories })
+            : handleChangeSearchParams({
+                type: searchParamsAction.categories,
+                payload: categoryFilterOption
+            })
+    }, [categoryFilterOption]);
     const handleGendersFilter = event => {
         event.target.value === gendersFilterOption
             ? setGendersFilterOption('all')
             : setGendersFilterOption(event.target.value)
     }
+    useEffect(() => {
+        gendersFilterOption === 'all'
+            ? handleDeleteSearchParams({ type: searchParamsAction.gender })
+            : handleChangeSearchParams({
+                type: searchParamsAction.gender,
+                payload: gendersFilterOption
+            })
+    }, [gendersFilterOption]);
     const handlePricesFilter = event => {
-        event.target.value === pricesFilterOption.value
+        event.target.value === pricesFilterOption.value || event.target.value === 'price-all'
             ? setPricesFilterOption({
                 value: 'price-all',
                 isValid: true,
@@ -109,15 +128,42 @@ export const StoreFilterbar = () => {
         }))
     }
     const handleMaxPriceSpecifyInput = event => {
-        setPricesFilterOption(prevState => ({
+        setPricesFilterOption((prevState) => ({
             ...prevState,
             max: event.target.valueAsNumber ,
             isValid: (event.target.valueAsNumber  > pricesFilterOption.min),
         }))
     }
+    const handlePriceSpecifySubmit = () => {
+        handleChangeSearchParams({
+            type: searchParamsAction.price,
+            payload: {
+                min: pricesFilterOption.min,
+                max: pricesFilterOption.max
+            }
+        })
+        setPricesFilterOption((prevState) => ({
+            ...prevState,
+            isValid: false
+        }))
+    }
+    useEffect(() => {
+        pricesFilterOption.value === 'price-all'
+            ? handleDeleteSearchParams({
+                type: searchParamsAction.price
+            })
+            :  pricesFilterOption.value !== 'price-specify' &&
+            handleChangeSearchParams({
+                type: searchParamsAction.price,
+                payload: {
+                    min: pricesFilterOption.min,
+                    max: pricesFilterOption.max
+                }
+            })
+    }, [pricesFilterOption.value]);
     return (
         <>
-            <div ref={filterRef} className="basis-1/5 hidden md:block overflow-y-auto pb-5">
+            <div ref={filterRef} className={`${storeState.isLoading ? 'opacity-70' : 'opacity-100'} basis-1/5 hidden md:block overflow-y-auto pb-5 bg-white`}>
                 <div className="mt-5 mx-auto w-9/12 flex flex-col gap-y-5 text-base font-semibold text-zinc-800">
                     <ul className="flex flex-col gap-y-5">
                         <li className="text-2xl font-bold select-none">Series for You</li>
@@ -145,36 +191,41 @@ export const StoreFilterbar = () => {
                                        onChange={handleCategoryFilter}
                                        checked={categoryFilterOption === "all"}
                                        className="ml-auto w-3.5  accent-black"
+                                       disabled={storeState.isLoading}
                                 />
                             </label>
                             <label className="flex justify-start">
-                                Euphy
-                                <input type="checkbox" value="euphy"
+                                Accessories
+                                <input type="checkbox" value="accessories"
                                        onChange={handleCategoryFilter}
-                                       checked={categoryFilterOption === "euphy"}
+                                       checked={categoryFilterOption === "accessories"}
                                        className="ml-auto w-3.5  accent-black"
+                                       disabled={storeState.isLoading}
                                 />
                             </label>
                             <label className="flex justify-start">
-                                Sakurako
-                                <input type="checkbox" value="sakurako"
+                                Cloth
+                                <input type="checkbox" value="cloth"
                                        onChange={handleCategoryFilter}
-                                       checked={categoryFilterOption === "sakurako"}
+                                       checked={categoryFilterOption === "cloth"}
                                        className="ml-auto w-3.5 accent-black"
+                                       disabled={storeState.isLoading}
                                 />
                             </label> <label className="flex justify-start">
-                                Mika
-                                <input type="checkbox" value="mika"
+                                Shoes
+                                <input type="checkbox" value="shoes"
                                        onChange={handleCategoryFilter}
-                                       checked={categoryFilterOption === "mika"}
+                                       checked={categoryFilterOption === "shoes"}
                                        className="ml-auto w-3.5 accent-black"
+                                       disabled={storeState.isLoading}
                                 />
                             </label> <label className="flex justify-start">
-                                Mari
-                                <input type="checkbox" value="mari"
+                                Euphylia
+                                <input type="checkbox" value="euphylia"
                                        onChange={handleCategoryFilter}
-                                       checked={categoryFilterOption === "mari"}
+                                       checked={categoryFilterOption === "euphylia"}
                                        className="ml-auto w-3.5  accent-black"
+                                       disabled={storeState.isLoading}
                                 />
                             </label>
                         </form>
@@ -191,6 +242,7 @@ export const StoreFilterbar = () => {
                                        onChange={handleGendersFilter}
                                        checked={gendersFilterOption === "all"}
                                        className="ml-auto w-3.5  accent-black"
+                                       disabled={storeState.isLoading}
                                 />
                             </label>
                             <label className="flex justify-start">
@@ -199,6 +251,7 @@ export const StoreFilterbar = () => {
                                        onChange={handleGendersFilter}
                                        checked={gendersFilterOption === "men"}
                                        className="ml-auto w-3.5  accent-black"
+                                       disabled={storeState.isLoading}
                                 />
                             </label>
                             <label className="flex justify-start">
@@ -207,6 +260,7 @@ export const StoreFilterbar = () => {
                                        onChange={handleGendersFilter}
                                        checked={gendersFilterOption === "women"}
                                        className="ml-auto w-3.5 accent-black"
+                                       disabled={storeState.isLoading}
                                 />
                             </label> <label className="flex justify-start">
                                 Kid
@@ -214,6 +268,7 @@ export const StoreFilterbar = () => {
                                        onChange={handleGendersFilter}
                                        checked={gendersFilterOption === "kid"}
                                        className="ml-auto w-3.5 accent-black"
+                                       disabled={storeState.isLoading}
                                 />
                             </label>
                         </form>
@@ -230,6 +285,7 @@ export const StoreFilterbar = () => {
                                        onChange={handlePricesFilter}
                                        checked={pricesFilterOption.value === "price-all"}
                                        className="ml-auto w-3.5  accent-black"
+                                       disabled={storeState.isLoading}
                                 />
                             </label>
                             <label className="flex justify-start">
@@ -238,6 +294,7 @@ export const StoreFilterbar = () => {
                                        onChange={handlePricesFilter}
                                        checked={pricesFilterOption.value === "price-sm"}
                                        className="ml-auto w-3.5  accent-black"
+                                       disabled={storeState.isLoading}
                                 />
                             </label>
                             <label className="flex justify-start">
@@ -246,6 +303,7 @@ export const StoreFilterbar = () => {
                                        onChange={handlePricesFilter}
                                        checked={pricesFilterOption.value === "price-md"}
                                        className="ml-auto w-3.5 accent-black"
+                                       disabled={storeState.isLoading}
                                 />
                             </label>
                             <label className="flex justify-start">
@@ -254,6 +312,7 @@ export const StoreFilterbar = () => {
                                        onChange={handlePricesFilter}
                                        checked={pricesFilterOption.value === "price-lg"}
                                        className="ml-auto w-3.5 accent-black"
+                                       disabled={storeState.isLoading}
                                 />
                             </label>
                             <label className="flex justify-start">
@@ -262,28 +321,33 @@ export const StoreFilterbar = () => {
                                        onChange={handlePricesFilter}
                                        checked={pricesFilterOption.value === "price-specify"}
                                        className="ml-auto w-3.5 accent-black"
+                                       disabled={storeState.isLoading}
                                 />
                             </label>
                             <div className={`${pricesFilterOption.value === 'price-specify' ? 'max-h-96' : 'max-h-0'} flex flex-col md:gap-y-4 lg:gap-y-2 overflow-hidden transition-max-h ease-in-out duration-300`}>
                                 <div className="relative text-sm col-span-full flex flex-col lg:flex-row items-center justify-between">
                                     <label htmlFor="min-specifyPriceInput">From</label>
                                     <input id="min-specifyPriceInput" type= "number"
-                                           inputMode="numeric" maxLength={5} placeholder="e.g: 1000"
+                                           inputMode="numeric" placeholder="e.g: 1000"
                                            onChange={handleMinPriceSpecifyInput}
                                            className="md:w-4/5 lg:w-3/5 border-b-[1px] border-black indent-1 text-base py-0.5 focus:outline-none"
+                                           disabled={storeState.isLoading}
                                     />
                                 </div>
                                 <div className="relative text-sm col-span-full flex flex-col lg:flex-row items-center justify-between">
                                     <label htmlFor="max-specifyPriceInput">To</label>
                                     <input id="max-specifyPriceInput" type= "number"
-                                           inputMode="numeric" maxLength={5} placeholder="e.g: 1200"
+                                           inputMode="numeric" placeholder="e.g: 1200"
                                            onChange={handleMaxPriceSpecifyInput}
                                            className="md:w-4/5 lg:w-3/5 border-b-[1px] border-black indent-1 text-base py-0.5 focus:outline-none"
+                                           disabled={storeState.isLoading}
                                     />
                                 </div>
                                 <div className="col-span-2 flex items-end justify-center">
-                                    <button className="opacity-100 scale-125 cursor-pointer disabled:opacity-60 disabled:scale-100 disabled:cursor-auto transition-scale ease-in-out duration-300"
-                                            disabled={!pricesFilterOption.isValid}>
+                                    <button type="button"
+                                            className="opacity-100 scale-125 cursor-pointer disabled:opacity-60 disabled:scale-100 disabled:cursor-auto transition-scale ease-in-out duration-300"
+                                            disabled={!pricesFilterOption.isValid}
+                                            onClick={handlePriceSpecifySubmit} >
                                         <i className="bi bi-check2-circle text-2xl"></i>
                                     </button>
                                 </div>
