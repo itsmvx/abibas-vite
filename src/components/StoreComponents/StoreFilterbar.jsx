@@ -1,11 +1,10 @@
 import {Link} from "react-router-dom";
-import {useContext, useState} from "react";
+import {useContext, useEffect, useRef, useState} from "react";
 import StoreContext from "./StoreContext.jsx";
 
 export const StoreFilterbar = () => {
     const {
-        seriesFeedState,
-        seriesFeedData,
+        storeState,
         ubedzApi,
     } = useContext(StoreContext)
     const [filterOption, setFilterOption] = useState({
@@ -21,7 +20,7 @@ export const StoreFilterbar = () => {
         min: 0,
         max: 99999999999,
     })
-
+    const filterRef = useRef(null)
     const handleFilter = event => {
         setFilterOption(prevState => ({
             ...prevState,
@@ -42,6 +41,13 @@ export const StoreFilterbar = () => {
                     ...prevState,
                     prices: !filterOption.prices,
                 }))
+
+        setTimeout(()=>{
+            filterRef.current.scrollTo({
+                top: filterRef.current.scrollHeight,
+                behavior: "smooth"
+            })
+        },150)
     }
     const handleCategoryFilter = event => {
         event.target.value === categoryFilterOption
@@ -88,6 +94,13 @@ export const StoreFilterbar = () => {
                             min:0,
                             max:0
                         })
+
+        setTimeout(()=>{
+            filterRef.current.scrollTo({
+                top: filterRef.current.scrollHeight,
+                behavior: "smooth"
+            })
+        },250)
     }
     const handleMinPriceSpecifyInput = event => {
         setPricesFilterOption(prevState => ({
@@ -104,19 +117,12 @@ export const StoreFilterbar = () => {
     }
     return (
         <>
-            <div className="basis-1/5 hidden md:block overflow-y-auto pb-5">
+            <div ref={filterRef} className="basis-1/5 hidden md:block overflow-y-auto pb-5">
                 <div className="mt-5 mx-auto w-9/12 flex flex-col gap-y-5 text-base font-semibold text-zinc-800">
                     <ul className="flex flex-col gap-y-5">
                         <li className="text-2xl font-bold select-none">Series for You</li>
                         {
-                            seriesFeedState.isError
-                                ? <>
-                                    <Link className="hover:font-bold text-black" to="/" >Ahmad Roblok</Link>
-                                    <Link className="hover:font-bold text-black" to="/" >Java Spring Boot</Link>
-                                    <Link className="hover:font-bold text-black" to="/" >Sunda Autumn Sneakers</Link>
-                                    <Link className="hover:font-bold text-black" to="/" >Sepatu Rahmat</Link>
-                                </>
-                                : seriesFeedData.map((items, index) => ((
+                           storeState.feedsData.map((items, index) => ((
                                     <Link key={index} className="hover:font-bold text-black uppercase"
                                           to={`/series/${items.name.toLowerCase().replace(/\s+/g, '-')}`}
                                     >
@@ -171,7 +177,6 @@ export const StoreFilterbar = () => {
                                        className="ml-auto w-3.5  accent-black"
                                 />
                             </label>
-
                         </form>
                     </div>
                     <div className="flex flex-col gap-y-2">

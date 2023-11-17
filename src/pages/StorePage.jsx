@@ -1,28 +1,87 @@
-import {Suspense, useEffect, useRef, useState} from "react";
+import {Suspense, useEffect, useReducer, useRef, useState} from "react";
 import {useSearchParams} from "react-router-dom";
 import axios from "axios";
 import {useSpring, useSprings} from "@react-spring/web";
-import StudentData from "../Utils/StudentData.jsx";
+import StudentData from "../lib/StudentDataLib.jsx";
 import StoreContext from "../components/StoreComponents/StoreContext.jsx";
 import {StoreNavbar} from "../components/StoreComponents/StoreNavbar.jsx";
 import {StoreFilterbar} from "../components/StoreComponents/StoreFilterbar.jsx";
 import {StoreSearchbar} from "../components/StoreComponents/StoreSearchbar.jsx";
-import {LoadingView} from "../Utils/LoadingView.jsx";
+import {LoadingView} from "../utils/LoadingView.jsx";
 import {StoreCollage} from "../components/StoreComponents/StoreCollage.jsx";
+import {DefaultStoreFeeds} from "../lib/StaticDataLib.jsx";
 
 export const StorePage = () => {
-
-    let ubedzApi = 'http://127.0.0.1:8000'
     // <--> STORE Universal <---> //
+    const searchModalRef = useRef(null)
     const [mobileUtilsState, setMobileUtilsState] = useState({
         filter: false,
         search: false,
     })
-
-    const searchModalRef = useRef(null)
-    let [storeSearchParams, setStoreSearchParams] = useSearchParams('')
+    let [storeSearchParams, setStoreSearchParams] = useSearchParams({
+        categories: '',
+        gender: '',
+        minPrice: 0,
+        maxPrice: 0,
+    })
     const [storeHeadingText, setStoreHeadingText] = useState('')
-    const [searchingState, setSearchingState] = useState({
+    const searchingAction = {
+        start: 'start',
+        cancel: 'cancel',
+        reset: 'reset',
+        success: 'success',
+        error: 'error',
+        notFound: 'not-found'
+    }
+    const searchingReducer = (state, action) => {
+        switch (action.type){
+            case searchingAction.start:
+                return {
+                    isSearching: true,
+                    isCanceled: false,
+                    isNotFound: false,
+                    isError: false,
+                    searchValue: action.payload,
+                    searchData: [],
+                }
+            case searchingAction.cancel:
+                return {
+                    isSearching: false,
+                    isCanceled: true,
+                    isNotFound: false,
+                    isError: false,
+                    searchValue: '',
+                    searchData: [],
+                }
+            case searchingAction.reset:
+                return {
+                    isSearching: false,
+                    isCanceled: false,
+                    isNotFound: false,
+                    isError: false,
+                    searchValue: '',
+                    searchData: [],
+                }
+            case searchingAction.success:
+                return {
+                    ...state,
+                    searchData: action.payload
+                }
+            case searchingAction.error:
+                return {
+                    ...state,
+                    isError: true
+                }
+            case searchingAction.notFound:
+                return {
+                    ...state,
+                    isNotFound: true
+                }
+            default:
+                return state;
+        }
+    }
+    const [searchingState, searchingDispatch ] = useReducer(searchingReducer, {
         isSearching: false,
         isCanceled: false,
         isNotFound: false,
@@ -30,74 +89,35 @@ export const StorePage = () => {
         searchValue: '',
         searchData: [],
     })
-    const handleSearchingStart = async (searchValue) => {
-        const searchVal = searchValue.target.value
-        if (searchVal === '') {
-            setSearchingState({
-                isSearching: false,
-                isCanceled: false,
-                isNotFound: false,
-                isError: false,
-                searchValue: '',
-                searchData: [],
-            })
-        } else {
-            setSearchingState({
-                isSearching: true,
-                isCanceled: false,
-                isNotFound: false,
-                isError: false,
-                searchValue: searchVal,
-                searchData: [],
-            })
-        }
+    const handleSearchingStart = event => {
+        event.target.value === ''
+            ? searchingDispatch({type: searchingAction.reset})
+            : searchingDispatch({type: searchingAction.start, payload: event.target.value})
     }
-    const handleSearchingCancel = () => {
-        setSearchingState({
-            isSearching: false,
-            isCanceled: true,
-            isNotFound: false,
-            isError: false,
-            searchValue: '',
-            searchData: [],
-        })
-    }
+    const handleSearchingCancel = () => searchingDispatch({ type: searchingAction.cancel })
+
+    const axiosAbortController = new AbortController();
     useEffect(() => {
-        const axiosAbortController = new AbortController();
         const fetchSearchRequest = async searchVal => {
             try {
                 const response
-                    = await axios.get(ubedzApi + '/api/search-products', {
+                    = await axios.get(import.meta.env.VITE_API_URL + '/api/search-products', {
                     params: {
                         search: searchVal,
                     },
                     signal: axiosAbortController.signal,
                     timeout: 6000,
                 });
-                const resSeriesIsEmpty = response.data.data.series.length === 0
-                const resProductsIsEmpty = response.data.data.products.length === 0
-                if (resSeriesIsEmpty && resProductsIsEmpty) {
-                    setSearchingState((prevState) => ({
-                        ...prevState,
-                        isNotFound: true,
-                    }));
+                const resultNotFound = response.data.data.series.length === 0 && response.data.data.products.length === 0
+                if (resultNotFound) {
+                    searchingDispatch({ type: searchingAction.notFound })
                 } else {
-                    setSearchingState((prevState) => ({
-                        ...prevState,
-                        searchData: response.data.data,
-                    }));
+                    searchingDispatch({ type: searchingAction.success, payload: response.data.data })
                 }
             } catch (error) {
                 if (!axios.isCancel(error)) {
                     console.error('Error fetching data', error);
-                    setSearchingState((prevState) => ({
-                        ...prevState,
-                        isSearching: false,
-                        isNotFound: false,
-                        isError: true,
-                        searchValue: '',
-                        searchData: [],
-                    }));
+                    searchingDispatch({ type: searchingAction.error })
                 }
             }
         };
@@ -122,7 +142,7 @@ export const StorePage = () => {
                 ? headingText = storeSearchParams.get('category')
                 : headingText = 'ABIBAS STORE'
 
-        setStoreHeadingText(headingText)
+        setStoreHeadingText(`Search of "${headingText}"`)
     }, [storeSearchParams]);
     // <--> END OF STORE Universal <--> //
 
@@ -159,7 +179,7 @@ export const StorePage = () => {
     }
     useEffect(() => {
         const sortData = () => {
-            const newData = [...collageData]
+            const newData = [...storeState.productsData]
             switch (sortState) {
                 case 'ascending' :
                     newData.sort((a, b) => a.name < b.name ? -1 : 1)
@@ -182,7 +202,7 @@ export const StorePage = () => {
                 to: {opacity: 1, filter: 'contrast(100%)'},
                 config: {duration: 700},
             });
-            setCollageData(newData)
+            storeDispatch({ type: storeAction.productsSortUpdate, payload: newData})
         }
         sortData()
     }, [sortState]);
@@ -227,40 +247,123 @@ export const StorePage = () => {
         }))
     }
 
-    // <--> FILTER SERIES FEED -->
-    const [seriesFeedState, setSeriesFeedState] = useState({
-        isLoading: true,
-        isError: false
-    })
-    const [seriesFeedData, setSeriesFeedData] = useState(
-        localStorage.getItem('storeSeriesFeed')
-            ? JSON.parse(localStorage.getItem('storeSeriesFeed'))
-            : []
-    )
-    // <--> END OF FILTER SERIES FEED -->
-
-    // <--> STORE COLLAGE <--> //
-    const [collageState, setCollageState] = useState({
+    // <--> STORE STATE <--> //
+    const storeAction = {
+        productsFetchStart: 'products-fetch-start',
+        productsFetchError: 'products-fetch-error',
+        productsFetchSuccess: 'products-fetch-success',
+        productsSortUpdate: 'products-sort-update',
+        feedsFetchError: 'feeds-fetch-error',
+        feedsFetchSuccess: 'feeds-fetch-success'
+    }
+    const storeReducer = (state, action) => {
+        switch (action.type){
+            case storeAction.feedsFetchError:
+                return {
+                    ...state,
+                    feedsData: [...DefaultStoreFeeds],
+                }
+            case storeAction.feedsFetchSuccess:
+                return {
+                    ...state,
+                    feedsLastUpdate: action.payload.lastUpdate,
+                    feedsData: action.payload.feedsData
+                }
+            case storeAction.productsFetchError:
+                return {
+                    ...state,
+                    isError: true,
+                    productsData: StudentData.slice(0,40)
+                }
+            case storeAction.productsFetchSuccess:
+                return {
+                    ...state,
+                    isLoading: false,
+                    productsData: action.payload
+                }
+            case storeAction.productsSortUpdate:
+                return {
+                    ...state,
+                    productsData: action.payload
+                }
+            default:
+                return state
+        }
+    }
+    const [storeState, storeDispatch] = useReducer(storeReducer, {
         isLoading: true,
         isError: false,
-        lastUpdate: localStorage.getItem('storeLastUpdate')
-            ? JSON.parse(localStorage.getItem('storeLastUpdate'))
-            : ''
-    })
-    const [collageData, setCollageData] = useState(
-        localStorage.getItem('storeProductsData')
+        feedsLastUpdate: localStorage.getItem('storeFeedsUpdate')
+            ? JSON.parse(localStorage.getItem('storeFeedsUpdate'))
+            : '1970-01-01 00:00:00',
+        feedsData: localStorage.getItem('storeFeedsData')
+            ? JSON.parse(localStorage.getItem('storeFeedsData'))
+            : [],
+        productsData: localStorage.getItem('storeProductsData')
             ? JSON.parse(localStorage.getItem('storeProductsData'))
             : []
-    )
+    })
+    useEffect(() => {
+        document.title = 'Abibas | Store';
+        const fetchFeedsData = async newLastUpdate => {
+            try {
+                const response
+                    = await axios.get(import.meta.env.VITE_API_URL + '/api/latest-seriess')
+                storeDispatch({
+                    type: storeAction.feedsFetchSuccess,
+                    payload: {
+                        lastUpdate: newLastUpdate,
+                        feedsData: response.data.data
+                    }
+                })
+                localStorage.setItem('storeFeedsUpdate', JSON.stringify(newLastUpdate))
+            } catch (error){
+                storeDispatch({ type: storeAction.feedsFetchError })
+                localStorage.removeItem('storeFeedsData')
+                localStorage.removeItem('storeFeedsUpdate')
+            }
+        }
+        const fetchProductsData = async () => {
+            try {
+                const response
+                    = await axios.get(import.meta.env.VITE_API_URL + '/api/products', {
+                    timeout: 6000,
+                })
+                storeDispatch({
+                    type: storeAction.productsFetchSuccess,
+                    payload: response.data.data
+                })
+            } catch (error) {
+                storeDispatch({ type: storeAction.productsFetchError })
+            }
+        }
+        const fetchStoreData = () => {
+            axios.get(import.meta.env.VITE_API_URL + '/api/store-update')
+                .then((response)=>{
+                    const newLastUpdate = response.data.data
+                    if (newLastUpdate > storeState.lastUpdate){
+                        fetchFeedsData(newLastUpdate)
+                    }
+                })
+                .catch(()=>{
+                    storeDispatch({ type: storeAction.feedsFetchError })
+                    localStorage.removeItem('storeFeedsUpdate')
+                })
+            fetchProductsData()
+        }
+        fetchStoreData()
+    }, []);
+
+
     const [collageAnimation, collageAnimationApi]
         = useSprings(
-        collageData.length,
+        storeState.productsData.length,
         () => ({
             from: { opacity: 0, transform: 'scale(0.95)' },
             to: { opacity: 1, transform: 'scale(1)' },
             config: {duration: 300}
         }),
-        [collageData]
+        [storeState.collageData]
     )
     const [collageDetailAnimation, collageDetailAnimationApi]
         = useSprings(
@@ -283,77 +386,9 @@ export const StorePage = () => {
             config: {duration: 210},
         })
     }
-    useEffect(() => {
-        document.title = 'Abibas : Store';
-        const fetchStoreUpdate = async () => {
-            try {
-                const response
-                = await  axios.get(ubedzApi + '/api/store-update')
-
-                setCollageState({
-                    isLoading: false,
-                    isError: false,
-                    lastUpdate: response
-                })
-                localStorage.setItem('storeLastUpdate', JSON.stringify(response))
-            }
-            catch (error){
-                setCollageState({
-                    isLoading: true,
-                    isError: true,
-                    lastUpdate: '1970-01-01 00:00:00'
-                })
-                localStorage.removeItem('storeLastUpdate')
-            }
-        }
-        const fetchSeriesFeed = async () => {
-            try {
-                const response
-                = await axios.get(ubedzApi + '/api/latest-series')
-
-                setSeriesFeedState({
-                    isLoading: false,
-                    isError: false,
-                })
-                setSeriesFeedData(response.data.data)
-                localStorage.setItem('storeSeriesFeed', JSON.stringify(response.data.data))
-            }catch (error){
-                setSeriesFeedState({
-                    isLoading: true,
-                    isError: true,
-                })
-            }
-        }
-        const fetchCollageData = async () => {
-            try {
-                const response
-                    = await axios.get(ubedzApi + '/api/products', {
-                    timeout: 6000,
-                })
-                setCollageState({
-                    isLoading: false,
-                    isError: false,
-                })
-                setCollageData(response.data.data)
-                localStorage.setItem('storeProductsData', JSON.stringify(response.data.data))
-            } catch (error) {
-                setCollageState({
-                    isLoading: false,
-                    isError: true,
-                })
-                setCollageData(StudentData.slice(0, 20))
-                localStorage.removeItem('storeProductsData')
-            }
-        }
-        fetchStoreUpdate().catch(()=>console.log)
-        collageData.length === 0 && fetchCollageData()
-        seriesFeedData.length === 0 && fetchSeriesFeed()
-    }, []);
-
-    // <--> END OF STORE COLLAGE <--> //
+    // <--> END OF STORE PAGE STATE <--> //
 
     const contextValues = {
-        ubedzApi,
         mobileUtilsState,
         storeSearchParams,
         setStoreSearchParams,
@@ -374,15 +409,10 @@ export const StorePage = () => {
         handleFilterOpen,
         handleFilterClose,
         searchingState,
-        setSearchingState,
         searchModalRef,
         searchbarRef,
         searchbarAnimation,
-        seriesFeedState,
-        seriesFeedData,
-        collageState,
-        setCollageState,
-        collageData,
+        storeState,
         collageAnimation,
         collageAnimationApi,
         collageDetailAnimation,

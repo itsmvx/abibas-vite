@@ -2,7 +2,7 @@ import {animated} from "@react-spring/web";
 import {useContext, useRef} from "react";
 import StoreContext from "./StoreContext.jsx";
 import {StoreSearchModal} from "./StoreSearchModal.jsx";
-
+import {Haruna1L} from "../../lib/ImageLib.jsx"
 export const StoreNavbar = () => {
     const {
         storeHeadingText,
@@ -18,6 +18,7 @@ export const StoreNavbar = () => {
         handleFilterOpen,
         mobileUtilsState,
     } = useContext(StoreContext)
+
     let onTyping
     const inputSearchRef = useRef(null)
     return (
@@ -38,7 +39,6 @@ export const StoreNavbar = () => {
                                     searchingState.isSearching && handleSearchingCancel()
                                     clearTimeout(onTyping)
                                     onTyping = setTimeout(() => {
-                                        console.log("ehe")
                                         handleSearchingStart(e)
                                     }, 1500)
                                 }

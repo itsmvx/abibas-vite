@@ -1,16 +1,14 @@
-import {memo, useContext, useMemo} from "react";
+import {memo, useContext} from "react";
 import {animated} from "@react-spring/web";
 import StoreContext from "./StoreContext.jsx";
-import {LoadingView} from "../../Utils/LoadingView.jsx";
+import {LoadingView} from "../../utils/LoadingView.jsx";
 export const StoreCollage = memo(() => {
     const {
         collageAnimation,
         collageDetailAnimation,
         handleCollageHoverIn,
         handleCollageHoverOut,
-        collageState,
-        collageData,
-        ubedzApi,
+        storeState,
     } = useContext(StoreContext)
     const DefaultCollage = () => {
         return <>
@@ -23,7 +21,7 @@ export const StoreCollage = memo(() => {
                                       onMouseEnter={()=> handleCollageHoverIn(index)}
                                       onMouseLeave={()=> handleCollageHoverOut(index)}>
                             <div className="w-full aspect-[4/3] overflow-hidden">
-                                <img src={collageData[index].photoUrl}
+                                <img src={storeState.productsData[index].photoUrl}
                                      className="w-full h-full object-cover" alt=".." loading="lazy"/>
                             </div>
                             <animated.div
@@ -37,7 +35,9 @@ export const StoreCollage = memo(() => {
 
                             <div className="absolute top-2/3 bottom-0 w-full flex flex-col">
                                 <div className="basis-3/5 w-11/12 mx-auto">
-                                    <h1 className="uppercase my-auto text-black font-bold text-sm md:text-base tracking-tight">{collageData[index].names.lastName} {collageData[index].names.firstName}</h1>
+                                    <h1 className="uppercase my-auto text-black font-bold text-sm md:text-base tracking-tight">
+                                        {storeState.productsData[index].names.lastName} {storeState.productsData[index].names.firstName}
+                                    </h1>
                                 </div>
                                 <div className="basis-2/5 flex-none w-11/12 mx-auto text-xs md:text-sm">
                                     Rp.69000
@@ -60,7 +60,7 @@ export const StoreCollage = memo(() => {
                                       onMouseLeave={()=> handleCollageHoverOut(index)}
                         >
                             <div className="w-full aspect-square overflow-hidden">
-                                <img src={ubedzApi + '/assets/' + collageData[index].imgPath.img1}
+                                <img src={import.meta.env.REST_API_URL + '/assets/' + storeState.storeState.productsData[index].imgPath.img1}
                                      className="w-full h-full object-cover" alt=".." loading="lazy"/>
                             </div>
                             <animated.div
@@ -73,7 +73,7 @@ export const StoreCollage = memo(() => {
                                             <h1 className="text-sm font-semibold">Size Available</h1>
                                             <div className="flex flex-row gap-x-2">
                                                 {
-                                                    collageData[index].specs.size.split(',').map((items, index) => ((
+                                                    storeState.storeState.productsData[index].specs.size.split(',').map((items, index) => ((
                                                         <div key={index} className="min-w-[2.5rem] w-auto p-1 mt-0.5 capitalize text-sm flex items-center justify-center rounded-md border-[1px] border-black">
                                                             {items}
                                                         </div>
@@ -85,7 +85,7 @@ export const StoreCollage = memo(() => {
                                             <h1 className="text-sm font-semibold">Colors</h1>
                                             <div className="flex flex-row gap-x-1.5">
                                                 {
-                                                    collageData[index].specs.color.split(',').map((items, index) => ((
+                                                    storeState.productsData[index].specs.color.split(',').map((items, index) => ((
                                                         <div key={index} className="w-auto p-1 mt-0.5 capitalize text-sm flex items-center justify-center rounded-md border-[1px] border-black">
                                                             {items}
                                                         </div>
@@ -100,16 +100,16 @@ export const StoreCollage = memo(() => {
                             <div className="absolute top-[80%] bottom-0 w-full flex flex-col">
                                 <div className="basis-1/5 w-11/12 mx-auto">
                                     <p className="text-[11px] capitalize font-medium text-zinc-600">
-                                        {collageData[index].gender} {collageData[index].subCategory}
+                                        {storeState.productsData[index].gender} {storeState.productsData[index].subCategory}
                                     </p>
                                 </div>
                                 <div className="basis-2/5 w-11/12 mx-auto">
                                     <h1 className="uppercase my-auto text-black font-semibold text-sm md:text-base tracking-tight">
-                                        {collageData[index].name}
+                                        {storeState.productsData[index].name}
                                     </h1>
                                 </div>
                                 <div className="basis-2/5 flex-none w-11/12 mx-auto text-xs md:text-sm">
-                                    Rp.{collageData[index].price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
+                                    Rp.{storeState.productsData[index].price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
                                 </div>
                             </div>
                         </animated.div>
@@ -122,12 +122,13 @@ export const StoreCollage = memo(() => {
         <>
             <div className="w-[97%] h-full mt-3.5 flex flex-row flex-wrap items-start justify-start md:justify-center lg:justify-start gap-y-6 gap-3 md:gap-y-6 md:gap-x-10 lg:gap-y-10 lg:gap-x-4 mx-auto">
                 {
-                    collageState.isLoading && !collageState.isError && collageData.length === 0
+                    storeState.isLoading && !storeState.isError && storeState.productsData.length === 0
                         ? <LoadingView />
-                        : collageState.isError && !collageState.isLoading
+                        : storeState.isError && !storeState.isLoading
                                 ? <></>
-                                : !collageState.isError && collageData.length !== 0
-                                    && <FetchedCollage/>
+                                : !storeState.isError && storeState.productsData.length !== 0
+                                    ? <FetchedCollage/>
+                                    : <DefaultCollage/>
                 }
 
             </div>
