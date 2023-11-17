@@ -1,5 +1,7 @@
 import {animated, useSpring} from "@react-spring/web";
 import {useRef} from "react";
+import {Link} from "react-router-dom";
+import {Haruna1L, Mari1L, Noa2L} from "../../lib/ImageLib.jsx";
 
 export const HomeGendersBanner = () => {
     const genderHelpBtn = useRef(null)
@@ -50,25 +52,25 @@ export const HomeGendersBanner = () => {
                 <div className="basis-5/6 flex-none">
                     <div className="w-2/3 sm:w-10/12 h-full mx-auto overflow-hidden select-none grid grid-cols-1 md:grid-cols-7 lg:grid-cols-3 gap-x-6 md:gap-y-10">
                         <div className="aspect-square relative md:col-start-1 md:col-span-3 lg:col-start-1 lg:col-span-1">
-                            <img src="/assets/haruna-buntut2.webp" className="w-full h-full object-cover object-top" alt="" loading="lazy"/>
-                            <a href="/"
+                            <img src={Haruna1L} className="w-full h-full object-cover object-top" alt="" loading="lazy"/>
+                            <Link to="/"
                                className="absolute top-[80%] left-1/2 -translate-x-1/2 w-28 h-10 flex items-center justify-center gap-x-1 border-black border-[1px] ring-[0.5px] ring-inset ring-white bg-black font-bold text-base text-white">
                                 MEN <i className="bi bi-arrow-right"></i>
-                            </a>
+                            </Link>
                         </div>
                         <div className="aspect-square relative md:col-start-5 md:col-span-3 lg:col-start-2 lg:col-span-1">
-                            <img src="/assets/20230702_185119.webp" className="w-full h-full object-cover object-top" alt="" loading="lazy"/>
-                            <a href="/"
+                            <img src={Noa2L} className="w-full h-full object-cover object-top" alt="" loading="lazy"/>
+                            <Link to="/"
                                className="absolute top-[80%] left-1/2 -translate-x-1/2 w-28 h-10 flex items-center justify-center gap-x-1 border-black border-[1px] ring-[0.5px] ring-inset ring-white bg-black font-bold text-base text-white">
                                 WOMEN <i className="bi bi-arrow-right"></i>
-                            </a>
+                            </Link>
                         </div>
                         <div className="aspect-square relative md:col-start-3 md:col-span-3 lg:col-start-3 lg:col-span-1">
-                            <img src="/assets/20231002_101833.webp" className="w-full h-full object-cover object-top" alt="" loading="lazy"/>
-                            <a href="/"
+                            <img src={Mari1L} className="w-full h-full object-cover object-top" alt="" loading="lazy"/>
+                            <Link to="/"
                                className="absolute top-[80%] left-1/2 -translate-x-1/2 w-28 h-10 flex items-center justify-center gap-x-1 border-black border-[1px] ring-[0.5px] ring-inset ring-white bg-black font-bold text-base text-white">
                                 KID <i className="bi bi-arrow-right"></i>
-                            </a>
+                            </Link>
                         </div>
                     </div>
                 </div>

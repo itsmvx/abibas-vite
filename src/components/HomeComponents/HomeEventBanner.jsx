@@ -5,7 +5,7 @@ export const HomeEventBanner = () => {
         <>
             <div className="flex items-center justify-center w-full h-auto bg-white">
                 <div className="relative aspect-[1.85/1] w-full h-full overflow-hidden text-white font-sans">
-                    <img src="/assets/haloFest-run.webp" alt="..." className="w-full h-full object-cover brightness-[60%]"/>
+                    <img src="" alt="..." className="w-full h-full object-cover brightness-[60%]"/>
                     <div className="absolute top-[60%] left-10">
                         <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold italic">RUN YOUR RUN</h1>
                         <p className="sm:text-lg md:text-xl lg:text-2xl font-semibold tracking-tighter">

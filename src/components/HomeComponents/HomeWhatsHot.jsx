@@ -3,6 +3,8 @@ import {FreeMode, Navigation} from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import {useEffect, useRef, useState} from "react";
+import {ImagesAll, ImagesNoa} from "../../lib/ImageLib.jsx";
+import {Link} from "react-router-dom";
 export const HomeWhatsHot = () => {
     const [windowSize, setWindowSize] = useState(()=>{
         return window.innerWidth >= 1024 ? 'lg' :
@@ -60,150 +62,26 @@ export const HomeWhatsHot = () => {
                             swiper.navigation.update()
                         }}
                     >
-                        <SwiperSlide key={0}
-                                     onMouseEnter={()=>handleWhatsHotMouseIn(0)}
-                                     onMouseLeave={handleWhatsHotMouseOut}
-                                     className="aspect-square relative">
-                            <div className={`${whatsHotIsHover === 0 ? 'opacity-100' : 'opacity-0'} whatsHotDesc`}>
-                                <div className="basis-3/4 flex-none flex flex-col items-center gap-y-5">
-                                    <h1 className="mt-5 font-bold text-lg">Kak Rio sayang</h1>
-                                    <p className="mx-5 font-semibold">Kak Rio kesayangan ewe ewe gass ewe brutal </p>
-                                </div>
-                                <div className="basis-1/4 flex flex-col gap-y-2 items-center justify-center">
-                                    <a href="/" className="font-bold text-sm bg-black p-1.5 text-white">See details</a>
-                                    <p className="font-medium">Rp.69696969</p>
-                                </div>
-                            </div>
-                            <img src="/assets/20230830_153932.webp" className="w-full h-full object-cover" alt="" loading="lazy"/>
-                        </SwiperSlide>
-                        <SwiperSlide key={1}
-                                     onMouseEnter={()=>handleWhatsHotMouseIn(1)}
-                                     onMouseLeave={handleWhatsHotMouseOut}
-                                     className="aspect-square relative">
-                            <div className={`${whatsHotIsHover === 1 ? 'opacity-100' : 'opacity-0'} whatsHotDesc`}>
-                                <div className="basis-3/4 flex-none flex flex-col items-center gap-y-5">
-                                    <h1 className="mt-5 font-bold text-lg">Kak Rio sayang</h1>
-                                    <p className="mx-5 font-semibold">Uhuuu :P</p>
-                                </div>
-                                <div className="basis-1/4 flex flex-col gap-y-2 items-center justify-center">
-                                    <a href="/" className="font-bold text-sm bg-black p-1.5 text-white">See details</a>
-                                    <p className="font-medium">Rp.69696969</p>
-                                </div>
-                            </div>
-                            <img src="/assets/20231002_105450.webp" className="w-full h-full object-cover" alt="" loading="lazy"/>
-                        </SwiperSlide>
-                        <SwiperSlide key={2}
-                                     onMouseEnter={()=>handleWhatsHotMouseIn(2)}
-                                     onMouseLeave={handleWhatsHotMouseOut}
-                                     className="aspect-square relative">
-                            <div className={`${whatsHotIsHover === 2 ? 'opacity-100' : 'opacity-0'} whatsHotDesc`}>
-                                <div className="basis-3/4 flex-none flex flex-col items-center gap-y-5">
-                                    <h1 className="mt-5 font-bold text-lg">Haruna si Buntut</h1>
-                                    <p className="mx-5 font-semibold">Aaaaa buntuuuuut</p>
-                                </div>
-                                <div className="basis-1/4 flex flex-col gap-y-2 items-center justify-center">
-                                    <a href="/" className="font-bold text-sm bg-black p-1.5 text-white">See details</a>
-                                    <p className="font-medium">Rp.69696969</p>
-                                </div>
-                            </div>
-                            <img src="/assets/illust_111858013_20230921_082744.webp" className="w-full h-full object-cover" alt="" loading="lazy"/>
-                        </SwiperSlide>
-                        <SwiperSlide key={3}
-                                     onMouseEnter={()=>handleWhatsHotMouseIn(3)}
-                                     onMouseLeave={handleWhatsHotMouseOut}
-                                     className="aspect-square relative">
-                            <div className={`${whatsHotIsHover === 3 ? 'opacity-100' : 'opacity-0'} whatsHotDesc`}>
-                                <div className="basis-3/4 flex-none flex flex-col items-center gap-y-5">
-                                    <h1 className="mt-5 font-bold text-lg">Haruna si Buntut</h1>
-                                    <p className="mx-5 font-semibold">Sini buntut lo Haruna, Sini gwe en</p>
-                                </div>
-                                <div className="basis-1/4 flex flex-col gap-y-2 items-center justify-center">
-                                    <a href="/" className="font-bold text-sm bg-black p-1.5 text-white">See details</a>
-                                    <p className="font-medium">Rp.69696969</p>
-                                </div>
-                            </div>
-                            <img src="/assets/haruna-buntut1.webp" className="w-full h-full object-cover" alt="" loading="lazy"/>
-                        </SwiperSlide>
-                        <SwiperSlide key={4}
-                                     onMouseEnter={()=>handleWhatsHotMouseIn(4)}
-                                     onMouseLeave={handleWhatsHotMouseOut}
-                                     className="aspect-square relative">
-                            <div className={`${whatsHotIsHover === 4 ? 'opacity-100' : 'opacity-0'} whatsHotDesc`}>
-                                <div className="basis-3/4 flex-none flex flex-col items-center gap-y-5">
-                                    <h1 className="mt-5 font-bold text-lg">Kak Rio sayang</h1>
-                                    <p className="mx-5 font-semibold">Wah ini mah jelas kerink, or cringe ( maybe? )</p>
-                                </div>
-                                <div className="basis-1/4 flex flex-col gap-y-2 items-center justify-center">
-                                    <a href="/" className="font-bold text-sm bg-black p-1.5 text-white">See details</a>
-                                    <p className="font-medium">Rp.69696969</p>
-                                </div>
-                            </div>
-                            <img src="/assets/illust_108613753_20230615_070606.webp" className="w-full h-full object-cover" alt="" loading="lazy"/>
-                        </SwiperSlide>
-                        <SwiperSlide key={5}
-                                     onMouseEnter={()=>handleWhatsHotMouseIn(5)}
-                                     onMouseLeave={handleWhatsHotMouseOut}
-                                     className="aspect-square relative">
-                            <div className={`${whatsHotIsHover === 5 ? 'opacity-100' : 'opacity-0'} whatsHotDesc`}>
-                                <div className="basis-3/4 flex-none flex flex-col items-center gap-y-5">
-                                    <h1 className="mt-5 font-bold text-lg">Noaaaa</h1>
-                                    <p className="mx-5 font-semibold">Udah ga perlu ditanya lagi..</p>
-                                </div>
-                                <div className="basis-1/4 flex flex-col gap-y-2 items-center justify-center">
-                                    <a href="/" className="font-bold text-sm bg-black p-1.5 text-white">See details</a>
-                                    <p className="font-medium">Rp.69696969</p>
-                                </div>
-                            </div>
-                            <img src="/assets/20230702_185119.webp" className="w-full h-full object-cover" alt="" loading="lazy"/>
-                        </SwiperSlide>
-                        <SwiperSlide key={6}
-                                     onMouseEnter={()=>handleWhatsHotMouseIn(6)}
-                                     onMouseLeave={handleWhatsHotMouseOut}
-                                     className="aspect-square relative">
-                            <div className={`${whatsHotIsHover === 6 ? 'opacity-100' : 'opacity-0'} whatsHotDesc`}>
-                                <div className="basis-3/4 flex-none flex flex-col items-center gap-y-5">
-                                    <h1 className="mt-5 font-bold text-lg">Noa & Yuuka</h1>
-                                    <p className="mx-5 font-semibold">Senyuman Noa, Senyuman penguras</p>
-                                </div>
-                                <div className="basis-1/4 flex flex-col gap-y-2 items-center justify-center">
-                                    <a href="/" className="font-bold text-sm bg-black p-1.5 text-white">See details</a>
-                                    <p className="font-medium">Rp.69696969</p>
-                                </div>
-                            </div>
-                            <img src="/assets/20230522_194233.webp" className="w-full h-full object-cover" alt="" loading="lazy"/>
-                        </SwiperSlide>
-                        <SwiperSlide key={7}
-                                     onMouseEnter={()=>handleWhatsHotMouseIn(7)}
-                                     onMouseLeave={handleWhatsHotMouseOut}
-                                     className="aspect-square relative">
-                            <div className={`${whatsHotIsHover === 7 ? 'opacity-100' : 'opacity-0'} whatsHotDesc`}>
-                                <div className="basis-3/4 flex-none flex flex-col items-center gap-y-5">
-                                    <h1 className="mt-5 font-bold text-lg">Tante Shiroko</h1>
-                                    <p className="mx-5 font-semibold">Jelas kerink, aseli</p>
-                                </div>
-                                <div className="basis-1/4 flex flex-col gap-y-2 items-center justify-center">
-                                    <a href="/" className="font-bold text-sm bg-black p-1.5 text-white">See details</a>
-                                    <p className="font-medium">Rp.69696969</p>
-                                </div>
-                            </div>
-                            <img src="/assets/20230905_150623.webp" className="w-full h-full object-cover" alt="" loading="lazy"/>
-                        </SwiperSlide>
-                        <SwiperSlide key={8}
-                                     onMouseEnter={()=>handleWhatsHotMouseIn(8)}
-                                     onMouseLeave={handleWhatsHotMouseOut}
-                                     className="aspect-square relative">
-                            <div className={`${whatsHotIsHover === 8 ? 'opacity-100' : 'opacity-0'} whatsHotDesc`}>
-                                <div className="basis-3/4 flex-none flex flex-col items-center gap-y-5">
-                                    <h1 className="mt-5 font-bold text-lg">Kak Rio sayang</h1>
-                                    <p className="mx-5 font-semibold">Tahukah kamu, 70% tubuh manusia adalah Air, namun sama kak Rio jelas dihabiskan langsung kerink </p>
-                                </div>
-                                <div className="basis-1/4 flex flex-col gap-y-2 items-center justify-center">
-                                    <a href="/" className="font-bold text-sm bg-black p-1.5 text-white">See details</a>
-                                    <p className="font-medium">Rp.69696969</p>
-                                </div>
-                            </div>
-                            <img src="/assets/1a02ee73cea842d9fe6c3c2c0d39d597.webp" className="w-full h-full object-cover object-right" alt="" loading="lazy"/>
-                        </SwiperSlide>
+                        {
+                            ImagesAll.map((image, index) => ((
+                                <SwiperSlide key={index}
+                                             onMouseEnter={()=>handleWhatsHotMouseIn(index)}
+                                             onMouseLeave={handleWhatsHotMouseOut}
+                                             className="aspect-square relative">
+                                    <div className={`${whatsHotIsHover === index ? 'opacity-100' : 'opacity-0'} whatsHotDesc`}>
+                                        <div className="basis-3/4 flex-none flex flex-col items-center gap-y-5">
+                                            <h1 className="mt-5 font-bold text-lg">Heading</h1>
+                                            <p className="mx-5 font-semibold">Lorem ipsum scripta odio efficiantur potenti vel in mauris</p>
+                                        </div>
+                                        <div className="basis-1/4 flex flex-col gap-y-2 items-center justify-center">
+                                            <Link to="/" className="font-bold text-sm bg-black p-1.5 text-white">See details</Link>
+                                            <p className="font-medium">Rp.69696969</p>
+                                        </div>
+                                    </div>
+                                    <img src={image} className="w-full h-full object-cover" alt="" loading="lazy"/>
+                                </SwiperSlide>
+                            )))
+                        }
                     </Swiper>
                 </div>
             </div>

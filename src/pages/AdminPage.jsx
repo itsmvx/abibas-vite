@@ -26,21 +26,11 @@ export const AdminPage = () => {
 
                 })
     }
-    const [kataNime, setKataNime] = useState('')
     const [formInput, setFormInput] = useState({
         username: '',
         password: ''
     })
 
-    useEffect(() => {
-        const fetchKataNime = async() => {
-            await axios.get('https://katanime.vercel.app/api/getrandom')
-                .then( respon=>{
-                    setKataNime(respon.data.message)
-                })
-        }
-        fetchKataNime()
-    }, []);
     const handleUnameInput = haha => {
         setFormInput(prevState => ({
             ...prevState,

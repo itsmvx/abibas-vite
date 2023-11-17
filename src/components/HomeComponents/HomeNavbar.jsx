@@ -96,7 +96,7 @@ export const HomeNavbar = () => {
 
     return (
         <>
-            <animated.nav style={navbarAnimation} className="w-full h-20 bg-white flex flex-row fixed top-0 left-0 z-50 border-b-2">
+            <animated.nav style={navbarAnimation} className="w-full h-24 bg-white flex flex-row fixed top-0 left-0 z-50 border-b-2">
                 <button className="basis-2/12 sm:basis-[12%] md:hidden w-full flex-none text-2xl mx-auto ">
                     <i className="bi bi-list"></i>
                 </button>
@@ -110,7 +110,7 @@ export const HomeNavbar = () => {
                         alt="..."/>
                     <a href="/" className="mt-2 font-breston font-bold text-3xl">ABIBAS</a>
                 </div>
-                <div className="hidden basis-3/4 md:flex md:flex-col">
+                <div className="hidden basis-3/4 md:flex md:flex-col mb-2">
                     <ul className="basis-1/4 flex flex-row justify-end gap-x-5 text-sm text-slate-600 font-sans mt-0.5 mr-3">
                         <li> <a href="/">News</a> </li>
                         <li> <a href="/">Help</a> </li>
