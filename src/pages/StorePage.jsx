@@ -10,15 +10,120 @@ import {StoreSearchbar} from "../components/StoreComponents/StoreSearchbar.jsx";
 import {LoadingView} from "../utils/LoadingView.jsx";
 import {StoreCollage} from "../components/StoreComponents/StoreCollage.jsx";
 import {DefaultStoreFeeds} from "../lib/StaticDataLib.jsx";
+import {fetchFeedsUpdate, fetchProductsData} from "../utils/AxiosFetch.jsx";
 
 export const StorePage = () => {
-    // <--> STORE Universal <---> //
-    const searchModalRef = useRef(null)
     const [mobileUtilsState, setMobileUtilsState] = useState({
-        filter: false,
-        search: false,
+        filterbar: false,
+        searchbar: false,
     })
-
+    const searchbarRef = useRef(null)
+    const [searchbarAnimation, searchbarAnimationApi]
+        = useSpring(()=>({
+        from: {x: 0},
+        to: {x: 0},
+        config: {duration: 500},
+    }))
+    const handleSearchbarOpen = () => {
+        setMobileUtilsState(prevState => ({
+            ...prevState,
+            searchbar: true
+        }))
+        searchbarAnimationApi.start({
+            from: {x: 1000},
+            to: {x: 0},
+            config: {duration: 400},
+            onStart: ()=>{
+                searchbarRef.current.classList.remove('hidden')
+            }
+        })
+    }
+    const handleSearchbarClose = () => {
+        setMobileUtilsState(prevState => ({
+            ...prevState,
+            searchbar: false,
+        }))
+        searchbarAnimationApi.start({
+            from: {x: 0},
+            to: {x: 1000},
+            config: {duration: 400},
+            onRest: ()=>{
+                searchbarRef.current.classList.add('hidden')
+            }
+        })
+    }
+    const handleFilterbarOpen = () => {
+        setMobileUtilsState(prevState => ({
+            ...prevState,
+            filterbar: true
+        }))
+    }
+    const handleFilterbarClose = () => {
+        setMobileUtilsState(prevState => ({
+            ...prevState,
+            filterbar: false,
+        }))
+    }
+    const sortAction = {
+        toggle: 'toggle',
+        changeValue: 'change-value'
+    }
+    const sortReducer = (action, state) => {
+        switch (action.type){
+            case sortAction.toggle:
+                return{
+                    ...state,
+                    isOpen: !state.isOpen
+                }
+            case sortAction.changeValue:
+                return {
+                    isOpen: false,
+                    value: action.payload
+                }
+            default:
+                return state
+        }
+    }
+    const [sortState, sortDispatch] = useReducer(sortReducer, {
+        isOpen: false,
+        value: 'featured'
+    })
+    const [sortAnimation, SortAnimationApi]
+        = useSpring(() => ({
+            from: {y: sortState.isOpen ? 0 : -10},
+            to: {y: sortState.isOpen ? -30 : 0},
+            config: {duration: 300}
+        })
+        ,[sortState.isOpen]
+    )
+    useEffect(() => {
+        const sortData = () => {
+            storeDispatch({ type: storeAction.productsFilterStart })
+            const newData = [...storeState.productsData]
+            switch (sortState.value) {
+                case 'ascending' :
+                    newData.sort((a, b) => a.name < b.name ? -1 : 1)
+                    break
+                case 'descending' :
+                    newData.sort((a, b) => a.name > b.name ? -1 : 1)
+                    break
+                case 'cheap' :
+                    newData.sort((a, b) => a.price < b.price ? -1 : 1)
+                    break
+                case 'expensive' :
+                    newData.sort((a, b) => a.price > b.price ? -1 : 1)
+                    break
+                default :
+                    newData.sort((a, b) => a.idProduk > b.idProduk ? -1 : 1)
+                    break
+            }
+            setTimeout(() => {
+                storeDispatch({ type: storeAction.productsSortUpdate, payload: newData})
+                storeDispatch({ type: storeAction.productsFilterEnd })
+            }, 700)
+        }
+        sortData()
+    }, [sortState.value]);
     const searchingAction = {
         start: 'start',
         cancel: 'cancel',
@@ -89,9 +194,8 @@ export const StorePage = () => {
             : searchingDispatch({type: searchingAction.start, payload: event.target.value})
     }
     const handleSearchingCancel = () => searchingDispatch({ type: searchingAction.cancel })
-
-    const axiosAbortController = new AbortController();
     useEffect(() => {
+        const axiosAbortController = new AbortController();
         const fetchSearchRequest = async searchVal => {
             try {
                 const response
@@ -115,7 +219,6 @@ export const StorePage = () => {
                 }
             }
         };
-
         if (searchingState.isSearching && !searchingState.isCanceled) {
             fetchSearchRequest(searchingState.searchValue);
         }
@@ -161,9 +264,30 @@ export const StorePage = () => {
         }
         setStoreSearchParams(storeSearchParams)
     }
+    const handleSubmitSearch = () => {
+
+    }
     useEffect(() => {
-        setStoreSearchParams(storeSearchParams)
-    }, [storeSearchParams]);
+        const fetchProducts = async () => {
+            const searchParams = {}
+            storeSearchParams.forEach((value, key) => {
+                searchParams[key] = value
+            })
+            await fetchProductsData(searchParams)
+                .then((response) => {
+                    storeDispatch({
+                        type: storeAction.productsFetchSuccess,
+                        payload: response.data.data
+                    })
+                })
+                .catch((error) => {
+                    storeDispatch({ type: storeAction.productsFetchError })
+                })
+        }
+        storeDispatch({ type: storeAction.productsFetchStart })
+        fetchProducts()
+    }, [storeSearchParams])
+
     const [storeHeadingText, setStoreHeadingText] = useState('')
     useEffect(() => {
         let headingText
@@ -177,112 +301,10 @@ export const StorePage = () => {
 
         setStoreHeadingText(`Search of "${headingText}"`)
     }, [storeSearchParams]);
-    // <--> END OF STORE Universal <--> //
 
-    // <--> STORE SEARCH <--> //
-    const searchbarRef = useRef(null)
-    const [searchbarAnimation, searchbarAnimationApi] = useSpring(()=>({
-        from: {x: 0},
-        to: {x: 0},
-        config: {duration: 500},
-    }))
-    // <--> END OF STORE SEARCH <--> //
-
-    // <--> STORE NAVBAR <--> //
-    const [isSortMenuOpen, setIsSortMenuOpen] = useState(false)
-    const [sortState, setSortState] = useState('featured')
-    const [sortMenuAnimation, SortMenuAnimationApi]
-        = useSpring(() => ({
-            from: {y: 0},
-            to: {y: 0},
-            config: {duration: 300}
-        })
-    ,[isSortMenuOpen])
-    const handleSort = sort => {
-        setSortState(sort)
-        setIsSortMenuOpen(false)
-    }
-    const handleSortMenu = () => {
-        setIsSortMenuOpen(!isSortMenuOpen)
-        SortMenuAnimationApi.start(() => ({
-            from: {y: isSortMenuOpen ? 0 : -10},
-            to: {y: isSortMenuOpen ? -30 : 0},
-            config: {duration: 150}
-        }))
-    }
-    useEffect(() => {
-        const sortData = () => {
-            const newData = [...storeState.productsData]
-            switch (sortState) {
-                case 'ascending' :
-                    newData.sort((a, b) => a.name < b.name ? -1 : 1)
-                    break
-                case 'descending' :
-                    newData.sort((a, b) => a.name > b.name ? -1 : 1)
-                    break
-                case 'cheap' :
-                    newData.sort((a, b) => a.price < b.price ? -1 : 1)
-                    break
-                case 'expensive' :
-                    newData.sort((a, b) => a.price > b.price ? -1 : 1)
-                    break
-                default :
-                    newData.sort((a, b) => a.idProduk > b.idProduk ? -1 : 1)
-                    break
-            }
-            collageAnimationApi.start({
-                from: {opacity: 0, filter: 'contrast(50%)'},
-                to: {opacity: 1, filter: 'contrast(100%)'},
-                config: {duration: 700},
-            });
-            storeDispatch({ type: storeAction.productsSortUpdate, payload: newData})
-        }
-        sortData()
-    }, [sortState]);
-    const handleSearchOpen = () => {
-        setMobileUtilsState(prevState => ({
-            ...prevState,
-            search: true
-        }))
-        searchbarAnimationApi.start({
-            from: {x: 1000},
-            to: {x: 0},
-            config: {duration: 400},
-            onStart: ()=>{
-                searchbarRef.current.classList.remove('hidden')
-            }
-        })
-    }
-    const handleSearchClose = () => {
-        setMobileUtilsState(prevState => ({
-            ...prevState,
-            search: false,
-        }))
-        searchbarAnimationApi.start({
-            from: {x: 0},
-            to: {x: 1000},
-            config: {duration: 400},
-            onRest: ()=>{
-                searchbarRef.current.classList.add('hidden')
-            }
-        })
-    }
-    const handleFilterOpen = () => {
-        setMobileUtilsState(prevState => ({
-            ...prevState,
-            filter: true
-        }))
-    }
-    const handleFilterClose = () => {
-        setMobileUtilsState(prevState => ({
-            ...prevState,
-            filter: false,
-        }))
-    }
-
-    // <--> STORE STATE <--> //
     const storeAction = {
         productsFetchStart: 'products-fetch-start',
+        productsFetchEnd: 'products-fetch-start',
         productsFetchError: 'products-fetch-error',
         productsFetchSuccess: 'products-fetch-success',
         productsSortUpdate: 'products-sort-update',
@@ -314,6 +336,7 @@ export const StorePage = () => {
                 return {
                     ...state,
                     productsData: StudentData.slice(0,40),
+                    isError: true,
                     isLoading: false
                 }
             case storeAction.productsFetchSuccess:
@@ -327,22 +350,6 @@ export const StorePage = () => {
                     ...state,
                     productsData: action.payload
                 }
-            case storeAction.productsFilterStart:
-                return {
-                    ...state,
-                    isFiltering: true,
-                }
-            case storeAction.productsFilterResult:
-                return {
-                    ...state,
-                    isFiltering: false,
-                    productsData: action.payload
-                }
-            case storeAction.productsFilterEnd:
-                return {
-                    ...state,
-                    isFiltering: false,
-                }
             default:
                 return state
         }
@@ -350,100 +357,57 @@ export const StorePage = () => {
     const [storeState, storeDispatch] = useReducer(storeReducer, {
         isLoading: true,
         isError: false,
-        isFiltering: false,
         feedsLastUpdate: localStorage.getItem('storeFeedsUpdate')
             ? JSON.parse(localStorage.getItem('storeFeedsUpdate'))
             : '1970-01-01 00:00:00',
         feedsData: localStorage.getItem('storeFeedsData')
             ? JSON.parse(localStorage.getItem('storeFeedsData'))
             : [],
-        productsData: StudentData.slice(0,40)
+        productsData: []
     })
     useEffect(() => {
-        document.title = 'Abibas | Store';
-        const fetchFeedsData = async newLastUpdate => {
-            try {
-                const response
-                    = await axios.get(import.meta.env.VITE_API_URL + '/api/latest-seriess')
-                storeDispatch({
-                    type: storeAction.feedsFetchSuccess,
-                    payload: {
-                        lastUpdate: newLastUpdate,
-                        feedsData: response.data.data
-                    }
-                })
-                localStorage.setItem('storeFeedsUpdate', JSON.stringify(newLastUpdate))
-            } catch (error){
-                storeDispatch({ type: storeAction.feedsFetchError })
-                localStorage.removeItem('storeFeedsData')
-                localStorage.removeItem('storeFeedsUpdate')
-            }
+        document.title = 'Abibas | Store'
+        const handleFeedsError = (error) => {
+            console.error(error)
+            storeDispatch({ type: storeAction.feedsFetchError })
+            localStorage.removeItem('storeFeedsData')
+            localStorage.removeItem('storeFeedsUpdate')
         }
-        const fetchProductsData = async () => {
-            try {
-                const response
-                    = await axios.get(import.meta.env.VITE_API_URL + '/api/products', {
-                    timeout: 6000,
-                })
-                storeDispatch({
-                    type: storeAction.productsFetchSuccess,
-                    payload: response.data.data
-                })
-            } catch (error) {
-                storeDispatch({ type: storeAction.productsFetchError })
-            }
-        }
-        const fetchStoreData = () => {
-            axios.get(import.meta.env.VITE_API_URL + '/api/store-update')
+        const fetchStoreData = async () => {
+            await fetchFeedsUpdate()
                 .then((response)=>{
                     const newLastUpdate = response.data.data
                     if (newLastUpdate > storeState.lastUpdate){
                         fetchFeedsData(newLastUpdate)
+                            .then(() => {
+                                localStorage.setItem('storeFeedsUpdate', JSON.stringify(newLastUpdate))
+                                storeDispatch({
+                                    type: storeAction.feedsFetchSuccess,
+                                    payload: {
+                                        lastUpdate: newLastUpdate,
+                                        feedsData: response.data.data
+                                    }
+                                })
+                            })
+                            .catch((error) => {
+                                handleFeedsError(error)
+                            })
                     }
                 })
-                .catch(()=>{
-                    storeDispatch({ type: storeAction.feedsFetchError })
-                    localStorage.removeItem('storeFeedsUpdate')
+                .catch((error) => {
+                    handleFeedsError(error)
                 })
-            fetchProductsData()
         }
-        storeDispatch({ type: storeAction.productsFetchStart })
         fetchStoreData()
     }, [])
-
-    useEffect(() => {
-        const fetchSearchProducts = async (searchParams) => {
-            try {
-                const response
-                    = await axios.get(import.meta.env.VITE_API_URL, '/products', {
-                    params: searchParams
-                })
-                storeDispatch({
-                    type: storeAction.productsFilterResult,
-                    payload: response.data.data
-                })
-            } catch (error) {
-                storeDispatch({type: storeAction.productsFilterEnd})
-            }
-            storeDispatch({type: storeAction.productsFilterEnd})
-        }
-        storeDispatch({type: storeAction.productsFilterStart})
-        const searchParams = {}
-        storeSearchParams.forEach((value, key) => {
-            searchParams[key] = value
-        })
-        fetchSearchProducts(searchParams)
-    }, [storeSearchParams])
-
-    const [collageAnimation, collageAnimationApi]
-        = useSprings(
+    const [collageAnimation, collageAnimationApi] = useSprings(
         storeState.productsData.length,
         () => ({
             from: { opacity: 0, transform: 'scale(0.95)' },
             to: { opacity: 1, transform: 'scale(1)' },
             config: {duration: 300}
         }),
-        [storeState.collageData]
+        [storeState.productsData]
     )
     const [collageDetailAnimation, collageDetailAnimationApi]
         = useSprings(
@@ -466,40 +430,29 @@ export const StorePage = () => {
             config: {duration: 210},
         })
     }
-    // <--> END OF STORE PAGE STATE <--> //
-
     const contextValues = {
         mobileUtilsState,
+        searchbarRef,
+        searchbarAnimation,
+        handleSearchbarOpen,
+        handleSearchbarClose,
+        handleFilterbarOpen,
+        handleFilterbarClose,
+        sortState,
+        sortAction,
+        sortDispatch,
+        sortAnimation,
         storeSearchParams,
-        setStoreSearchParams,
         searchParamsAction,
         handleChangeSearchParams,
         handleDeleteSearchParams,
         storeHeadingText,
-        setStoreHeadingText,
-        isSortMenuOpen,
-        setIsSortMenuOpen,
-        sortState,
-        setSortState,
-        sortMenuAnimation,
-        SortMenuAnimationApi,
-        handleSort,
-        handleSortMenu,
-        handleSearchOpen,
-        handleSearchClose,
+        searchingState,
         handleSearchingStart,
         handleSearchingCancel,
-        handleFilterOpen,
-        handleFilterClose,
-        searchingState,
-        searchModalRef,
-        searchbarRef,
-        searchbarAnimation,
         storeState,
         collageAnimation,
-        collageAnimationApi,
         collageDetailAnimation,
-        collageDetailAnimationApi,
         handleCollageHoverIn,
         handleCollageHoverOut,
     }
@@ -511,7 +464,7 @@ export const StorePage = () => {
                     <StoreFilterbar />
                     <StoreSearchbar/>
                     <div className="basis-full md:basis-4/5 bg-gray-50 overflow-y-scroll">
-                        <Suspense fallback={<LoadingView/>}>
+                        <Suspense fallback={<LoadingView />}>
                             <StoreCollage/>
                         </Suspense>
                     </div>

@@ -1,9 +1,10 @@
 import {Link} from "react-router-dom";
-import {useContext} from "react";
+import {useContext, useRef} from "react";
 import storeContext from "./StoreContext.jsx";
 
 export const StoreSearchModal = () => {
-    const {ubedzApi, searchingState, searchModalRef} = useContext(storeContext)
+    const {ubedzApi, searchingState} = useContext(storeContext)
+    const searchModalRef = useRef(null)
     const SearchModalResultElement = () => {
         return <>
             <div className="pb-10 basis-2/5 flex flex-col">
@@ -120,7 +121,8 @@ export const StoreSearchModal = () => {
                                 ? <SearchModalResultElement/>
                                 : searchingState.isNotFound
                                     ? <SearchModalNotFoundElement/>
-                                    : (searchingState.isError && !searchingState.isCanceled) && <SearchModalErrorElement/>
+                                    : (searchingState.isError && !searchingState.isCanceled)
+                                    && <SearchModalErrorElement/>
                     }
                 </div>
             </div>

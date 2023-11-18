@@ -1,8 +1,7 @@
-import {memo, useContext} from "react";
+import {useContext} from "react";
 import {animated} from "@react-spring/web";
 import StoreContext from "./StoreContext.jsx";
-import {LoadingView} from "../../utils/LoadingView.jsx";
-export const StoreCollage = memo(() => {
+export const StoreCollage = () => {
     const {
         collageAnimation,
         collageDetailAnimation,
@@ -16,7 +15,7 @@ export const StoreCollage = memo(() => {
                 collageAnimation.map((props,index) => {
                     return (
                         <animated.div key={index} style={props}
-                                      className={`${storeState.isFiltering ? 'contrast-50' : 'contrast-100'} relative basis-[45%] md:basis-2/5 lg:basis-[32%] mx-auto md:mx-0 w-full bg-white aspect-[4/5] overflow-hidden shadow-sm shadow-zinc-400 scale-125`}
+                                      className={`${storeState.isFiltering ? 'contrast-50' : 'contrast-100'} relative basis-[45%] md:basis-2/5 lg:basis-[32%] mx-auto md:mx-0 w-full bg-white aspect-[4/5] overflow-hidden shadow-sm shadow-zinc-400`}
                                       onMouseEnter={()=> handleCollageHoverIn(index)}
                                       onMouseLeave={()=> handleCollageHoverOut(index)}>
                             <div className="w-full aspect-[4/3] overflow-hidden">
@@ -53,7 +52,7 @@ export const StoreCollage = memo(() => {
                 collageAnimation.map((props,index) => {
                     return (
                         <animated.div key={index} style={props}
-                                      className={`${storeState.isFiltering | storeState.isSearching ? 'contrast-50' : 'contrast-100'} relative basis-[45%] md:basis-2/5 lg:basis-[32%] mx-auto md:mx-0 w-full bg-white aspect-[3/4] overflow-hidden shadow-sm shadow-zinc-400 scale-125`}
+                                      className={`${storeState.isFiltering | storeState.isSearching ? 'contrast-50' : 'contrast-100'} relative basis-[45%] md:basis-2/5 lg:basis-[32%] mx-auto md:mx-0 w-full bg-white aspect-[3/4] overflow-hidden shadow-sm shadow-zinc-400`}
                                       onMouseEnter={()=> handleCollageHoverIn(index)}
                                       onMouseLeave={()=> handleCollageHoverOut(index)}
                         >
@@ -115,16 +114,46 @@ export const StoreCollage = memo(() => {
              })}
         </>
     }
+    const LoadingCollage = () => {
+        return (
+            <>
+                {
+                    Array(6).fill().map((_, index) => ((
+                        <div key={index}
+                             className="relative basis-[45%] md:basis-2/5 lg:basis-[32%] mx-auto md:mx-0 w-full bg-white aspect-[4/5] overflow-hidden shadow-sm shadow-zinc-400"
+                        >
+                            <div className="w-full aspect-[4/3] overflow-hidden">
+                                <div className="w-full h-full object-cover bg-zinc-300">
+                                </div>
+                            </div>
+                            <div className="absolute top-2/3 bottom-0 w-full flex flex-col">
+                                <div className="basis-3/5 w-11/12 mx-auto">
+                                    <div className="w-3/4 bg-zinc-300 p-3.5">
+
+                                    </div>
+                                </div>
+                                <div className="basis-2/5 w-11/12 mx-auto">
+                                    <div className="w-28 bg-zinc-300 p-3">
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )))
+                }
+            </>
+        )
+    }
 
     return (
         <>
             <div className="w-[97%] h-full mt-3.5 flex flex-row flex-wrap items-start justify-start md:justify-center lg:justify-start gap-y-6 gap-3 md:gap-y-6 md:gap-x-10 lg:gap-y-10 lg:gap-x-4 mx-auto">
                 {
                     storeState.isLoading || storeState.productsData.length === 0
-                        ? <LoadingView />
+                        ? <LoadingCollage />
                         : storeState.isError && !storeState.isLoading && storeState.productsData.length !== 0
                                 ? <DefaultCollage/>
-                                : !storeState.isError && storeState.productsData.length !== 0
+                                : !storeState.isError &&  !storeState.isLoading && storeState.productsData.length !== 0
                                 ? <FetchedCollage/>
                                 : <DefaultCollage/>
                 }
@@ -132,5 +161,5 @@ export const StoreCollage = memo(() => {
             </div>
         </>
     )
-})
+}
 StoreCollage.displayName = 'StoreCollage';
