@@ -18,7 +18,7 @@ const fetchFeedsUpdate = async () => {
 }
 const fetchProductsData = async (searchParams = {}) => {
     try {
-        return await axios.get(import.meta.env.VITE_API_URL + '/products', {
+        return await axios.get(import.meta.env.VITE_API_URL + '/api/products', {
             params: searchParams
         })
     } catch (error) {
