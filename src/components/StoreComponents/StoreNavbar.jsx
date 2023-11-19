@@ -11,6 +11,8 @@ export const StoreNavbar = () => {
         handleSearchOpen,
         handleSearchingStart,
         handleSearchingCancel,
+        searchParamsAction,
+        handleChangeSearchParams,
         sortState,
         sortAction,
         sortDispatch,
@@ -31,7 +33,13 @@ export const StoreNavbar = () => {
                 </h1>
                 <div className="text-zinc-600 mb-2 flex justify-end gap-x-5">
                     <div className="relative hidden md:block w-4/5 h-4/5 z-20 bg-white">
-                        <form>
+                        <form  onSubmit={(e) => {
+                            e.preventDefault()
+                            handleChangeSearchParams ({
+                                type: searchParamsAction.search,
+                                payload: inputSearchRef.current.value
+                            })
+                        }}>
                             <label htmlFor="input-search" />
                             <input
                                 id="input-search"
@@ -47,6 +55,7 @@ export const StoreNavbar = () => {
                                         }, 1500)
                                     }
                                 }}
+
                                 type="text"
                                 className="w-full indent-1 outline-none border-b-[1.5px] border-zinc-800 relative"
                                 placeholder="Search.."

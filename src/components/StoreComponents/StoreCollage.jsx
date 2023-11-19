@@ -70,7 +70,7 @@ export const StoreCollage = () => {
                                             <h1 className="text-sm font-semibold">Size Available</h1>
                                             <div className="flex flex-row gap-x-2">
                                                 {
-                                                    storeState.storeState.productsData[index].specs.size.split(',').map((items, index) => ((
+                                                    storeState.productsData[index].specs.size.split(',').map((items, index) => ((
                                                         <div key={index} className="min-w-[2.5rem] w-auto p-1 mt-0.5 capitalize text-sm flex items-center justify-center rounded-md border-[1px] border-black">
                                                             {items}
                                                         </div>
@@ -144,18 +144,29 @@ export const StoreCollage = () => {
             </>
         )
     }
+    const NotFoundCollage = () => {
+        return(
+            <>
+                <div className="w-full h-full flex items-center justify-center">
+                    <p className="animate-fade animate-duration-500 ease-in-out">{`It's Look like products you're looking is Not Found`}</p>
+                </div>
+            </>
+        )
+    }
 
     return (
         <>
             <div className="w-[97%] h-full mt-3.5 flex flex-row flex-wrap items-start justify-start md:justify-center lg:justify-start gap-y-6 gap-3 md:gap-y-6 md:gap-x-10 lg:gap-y-10 lg:gap-x-4 mx-auto">
                 {
-                    storeState.isLoading || storeState.productsData.length === 0
+                    storeState.isLoading
                         ? <LoadingCollage />
-                        : storeState.isError && !storeState.isLoading && storeState.productsData.length !== 0
+                        : storeState.isError && !storeState.isLoading
                                 ? <DefaultCollage/>
-                                : !storeState.isError &&  !storeState.isLoading && storeState.productsData.length !== 0
-                                ? <FetchedCollage/>
-                                : <DefaultCollage/>
+                                : storeState.isNotFound && !storeState.isError &&  !storeState.isLoading
+                                ? <NotFoundCollage />
+                                : !storeState.isNotFound && !storeState.isError &&  !storeState.isLoading
+                                ? <FetchedCollage />
+                                : <DefaultCollage />
                 }
 
             </div>

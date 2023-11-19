@@ -229,22 +229,26 @@ export const StorePage = () => {
     }, [searchingState.isSearching, searchingState.isCanceled, searchingState.searchValue]);
 
     const searchParamsAction = {
-        categories: "categories",
-        gender: "gender",
-        price: "price"
+        search: 'search',
+        categories: 'categories',
+        gender: 'gender',
+        price: 'price'
     }
     let [storeSearchParams, setStoreSearchParams] = useSearchParams({})
     const handleChangeSearchParams = (action) => {
         switch (action.type) {
+            case searchParamsAction.search:
+                storeSearchParams.set('search', action.payload)
+                break
             case searchParamsAction.categories:
-                storeSearchParams.set("categories", action.payload)
+                storeSearchParams.set('categories', action.payload)
                 break
             case searchParamsAction.gender:
-                storeSearchParams.set("gender", action.payload)
+                storeSearchParams.set('gender', action.payload)
                 break
             case searchParamsAction.price:
-                storeSearchParams.set("min", action.payload.min)
-                storeSearchParams.set("max", action.payload.max)
+                storeSearchParams.set('min', action.payload.min)
+                storeSearchParams.set('max', action.payload.max)
                 break
         }
         setStoreSearchParams(storeSearchParams)
@@ -275,10 +279,15 @@ export const StorePage = () => {
             })
             await fetchProductsData(searchParams)
                 .then((response) => {
-                    storeDispatch({
-                        type: storeAction.productsFetchSuccess,
-                        payload: response.data.data
-                    })
+                    console.log(response.data.data)
+                    response.data.data.length === 0
+                        ? storeDispatch({
+                            type: storeAction.productsFetchNotFound
+                        })
+                        : storeDispatch({
+                            type: storeAction.productsFetchSuccess,
+                            payload: response.data.data
+                        })
                 })
                 .catch((error) => {
                     storeDispatch({ type: storeAction.productsFetchError })
@@ -300,11 +309,11 @@ export const StorePage = () => {
                 : headingText = 'ABIBAS STORE'
 
         setStoreHeadingText(`Search of "${headingText}"`)
-    }, [storeSearchParams]);
+    }, [storeSearchParams])
 
     const storeAction = {
         productsFetchStart: 'products-fetch-start',
-        productsFetchEnd: 'products-fetch-start',
+        productsFetchNotFound: 'products-fetch-not-found',
         productsFetchError: 'products-fetch-error',
         productsFetchSuccess: 'products-fetch-success',
         productsSortUpdate: 'products-sort-update',
@@ -330,13 +339,22 @@ export const StorePage = () => {
             case storeAction.productsFetchStart:
                 return {
                     ...state,
-                    isLoading: true
+                    isLoading: true,
+                    isNotFound: false,
+                    productsData: []
                 }
             case storeAction.productsFetchError:
                 return {
                     ...state,
                     productsData: StudentData.slice(0,40),
                     isError: true,
+                    isLoading: false
+                }
+            case storeAction.productsFetchNotFound:
+                return {
+                    ...state,
+                    productsData: [],
+                    isNotFound: true,
                     isLoading: false
                 }
             case storeAction.productsFetchSuccess:
@@ -357,6 +375,7 @@ export const StorePage = () => {
     const [storeState, storeDispatch] = useReducer(storeReducer, {
         isLoading: true,
         isError: false,
+        isNotFound: false,
         feedsLastUpdate: localStorage.getItem('storeFeedsUpdate')
             ? JSON.parse(localStorage.getItem('storeFeedsUpdate'))
             : '1970-01-01 00:00:00',
@@ -396,6 +415,16 @@ export const StorePage = () => {
                 })
                 .catch((error) => {
                     handleFeedsError(error)
+                })
+            await fetchProductsData()
+                .then((response) => {
+                    storeDispatch({
+                        type: storeAction.productsFetchSuccess,
+                        payload: response.data.data
+                    })
+                })
+                .catch((error) => {
+                    storeDispatch({ type: storeAction.productsFetchError })
                 })
         }
         fetchStoreData()
