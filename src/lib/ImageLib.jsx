@@ -5,7 +5,6 @@ import Haruna4L from "/assets/dec12f052b66040e64714a18354ea03d.webp"
 import Noa1L from "/assets/91e0bdf8e4a8af77250a9f6dbedc0bf2.webp"
 import Noa2L from "/assets/20230702_185119.webp"
 import Noa3L from "/assets/20230710_090318.webp"
-import Noa1P from "/assets/20230422_005858.webp"
 import Mari1L from "/assets/20230715_1315444.webp"
 import Mari2L from "/assets/20230815_130224.webp"
 import Rio1L from "/assets/20230830_205049.webp"
@@ -23,7 +22,6 @@ export const ImagesAll = [
     Noa1L,
     Noa2L,
     Noa3L,
-    Noa1P,
     Mari1L,
     Mari2L,
     Rio1L,
@@ -43,7 +41,6 @@ export {
     Noa1L,
     Noa2L,
     Noa3L,
-    Noa1P,
     Mari1L,
     Mari2L,
     Rio1L,
@@ -67,7 +64,6 @@ export const ImagesNoa = [
     Noa1L,
     Noa2L,
     Noa3L,
-    Noa1P,
 ]
 export const ImagesRio = [
     Rio1L,

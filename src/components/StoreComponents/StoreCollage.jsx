@@ -57,7 +57,7 @@ export const StoreCollage = () => {
                                       onMouseLeave={()=> handleCollageHoverOut(index)}
                         >
                             <div className="w-full aspect-square overflow-hidden">
-                                <img src={import.meta.env.REST_API_URL + '/assets/' + storeState.productsData[index].imgPath.img1}
+                               <img src={import.meta.env.REST_API_URL + '/assets/' + storeState.productsData[index].imgPath.img1}
                                      className="w-full h-full object-cover" alt=".." loading="lazy"/>
                             </div>
                             <animated.div

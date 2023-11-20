@@ -10,7 +10,7 @@ import {StoreSearchbar} from "../components/StoreComponents/StoreSearchbar.jsx";
 import {LoadingView} from "../utils/LoadingView.jsx";
 import {StoreCollage} from "../components/StoreComponents/StoreCollage.jsx";
 import {DefaultStoreFeeds} from "../lib/StaticDataLib.jsx";
-import {fetchFeedsUpdate, fetchProductsData} from "../utils/AxiosFetch.jsx";
+import {fetchFeedsUpdate, fetchFeedsData, fetchProductsData} from "../utils/AxiosFetch.jsx";
 
 export const StorePage = () => {
     const [mobileUtilsState, setMobileUtilsState] = useState({
@@ -64,41 +64,26 @@ export const StorePage = () => {
             filterbar: false,
         }))
     }
-    const sortAction = {
-        toggle: 'toggle',
-        changeValue: 'change-value'
-    }
-    const sortReducer = (action, state) => {
-        switch (action.type){
-            case sortAction.toggle:
-                return{
-                    ...state,
-                    isOpen: !state.isOpen
-                }
-            case sortAction.changeValue:
-                return {
-                    isOpen: false,
-                    value: action.payload
-                }
-            default:
-                return state
-        }
-    }
-    const [sortState, sortDispatch] = useReducer(sortReducer, {
-        isOpen: false,
+    const [sortState, setSortState] = useState({
+        isVisible: false,
         value: 'featured'
     })
-    const [sortAnimation, SortAnimationApi]
-        = useSpring(() => ({
-            from: {y: sortState.isOpen ? 0 : -10},
-            to: {y: sortState.isOpen ? -30 : 0},
-            config: {duration: 300}
+    const handleSortValue = payload => {
+        setSortState({
+            isVisible: false,
+            value: payload
         })
-        ,[sortState.isOpen]
-    )
+    }
+    const handleSortVisibility = () => {
+        setSortState((prevState) => ({
+            ...prevState,
+            isVisible: !sortState.isVisible
+        }))
+    }
+
     useEffect(() => {
         const sortData = () => {
-            storeDispatch({ type: storeAction.productsFilterStart })
+            storeDispatch({ type: storeAction.productsSortStart })
             const newData = [...storeState.productsData]
             switch (sortState.value) {
                 case 'ascending' :
@@ -118,9 +103,13 @@ export const StorePage = () => {
                     break
             }
             setTimeout(() => {
-                storeDispatch({ type: storeAction.productsSortUpdate, payload: newData})
-                storeDispatch({ type: storeAction.productsFilterEnd })
-            }, 700)
+                collageAnimationApi.start({
+                    from: { opacity: 0, transform: 'scale(0.96)' },
+                    to: { opacity: 1, transform: 'scale(1)' },
+                    config: {duration: 300}
+                })
+                storeDispatch({ type: storeAction.productsSortEnd, payload: newData})
+            }, 600)
         }
         sortData()
     }, [sortState.value]);
@@ -268,9 +257,6 @@ export const StorePage = () => {
         }
         setStoreSearchParams(storeSearchParams)
     }
-    const handleSubmitSearch = () => {
-
-    }
     useEffect(() => {
         const fetchProducts = async () => {
             const searchParams = {}
@@ -279,7 +265,6 @@ export const StorePage = () => {
             })
             await fetchProductsData(searchParams)
                 .then((response) => {
-                    console.log(response.data.data)
                     response.data.data.length === 0
                         ? storeDispatch({
                             type: storeAction.productsFetchNotFound
@@ -289,12 +274,14 @@ export const StorePage = () => {
                             payload: response.data.data
                         })
                 })
-                .catch((error) => {
+                .catch(() => {
                     storeDispatch({ type: storeAction.productsFetchError })
                 })
         }
-        storeDispatch({ type: storeAction.productsFetchStart })
-        fetchProducts()
+        if (storeState.wasLoaded){
+            storeDispatch({ type: storeAction.productsFetchStart })
+            fetchProducts()
+        }
     }, [storeSearchParams])
 
     const [storeHeadingText, setStoreHeadingText] = useState('')
@@ -312,11 +299,13 @@ export const StorePage = () => {
     }, [storeSearchParams])
 
     const storeAction = {
+        wasLoaded: 'was-loaded',
         productsFetchStart: 'products-fetch-start',
         productsFetchNotFound: 'products-fetch-not-found',
         productsFetchError: 'products-fetch-error',
         productsFetchSuccess: 'products-fetch-success',
-        productsSortUpdate: 'products-sort-update',
+        productsSortStart:'products-sort-start',
+        productsSortEnd:'products-sort-end',
         productsFilterStart: 'products-search-start',
         productsFilterResult: 'products-search-result',
         productsFilterEnd: 'products-search-end',
@@ -325,6 +314,18 @@ export const StorePage = () => {
     }
     const storeReducer = (state, action) => {
         switch (action.type){
+            case storeAction.wasLoaded:
+                return {
+                    ...state,
+                    wasLoaded: true
+                }
+            case storeAction.productsFetchStart:
+                return {
+                    ...state,
+                    isLoading: true,
+                    isNotFound: false,
+                    productsData: []
+                }
             case storeAction.feedsFetchError:
                 return {
                     ...state,
@@ -335,13 +336,6 @@ export const StorePage = () => {
                     ...state,
                     feedsLastUpdate: action.payload.lastUpdate,
                     feedsData: action.payload.feedsData
-                }
-            case storeAction.productsFetchStart:
-                return {
-                    ...state,
-                    isLoading: true,
-                    isNotFound: false,
-                    productsData: []
                 }
             case storeAction.productsFetchError:
                 return {
@@ -363,16 +357,23 @@ export const StorePage = () => {
                     productsData: action.payload,
                     isLoading: false,
                 }
-            case storeAction.productsSortUpdate:
+            case storeAction.productsSortStart:
                 return {
                     ...state,
-                    productsData: action.payload
+                    isLoading: true
+                }
+            case storeAction.productsSortEnd:
+                return {
+                    ...state,
+                    productsData: action.payload,
+                    isLoading: false
                 }
             default:
                 return state
         }
     }
     const [storeState, storeDispatch] = useReducer(storeReducer, {
+        wasLoaded: false,
         isLoading: true,
         isError: false,
         isNotFound: false,
@@ -386,6 +387,7 @@ export const StorePage = () => {
     })
     useEffect(() => {
         document.title = 'Abibas | Store'
+        let newLastUpdate = ''
         const handleFeedsError = (error) => {
             console.error(error)
             storeDispatch({ type: storeAction.feedsFetchError })
@@ -394,28 +396,23 @@ export const StorePage = () => {
         }
         const fetchStoreData = async () => {
             await fetchFeedsUpdate()
-                .then((response)=>{
-                    const newLastUpdate = response.data.data
-                    if (newLastUpdate > storeState.lastUpdate){
-                        fetchFeedsData(newLastUpdate)
-                            .then(() => {
-                                localStorage.setItem('storeFeedsUpdate', JSON.stringify(newLastUpdate))
-                                storeDispatch({
-                                    type: storeAction.feedsFetchSuccess,
-                                    payload: {
-                                        lastUpdate: newLastUpdate,
-                                        feedsData: response.data.data
-                                    }
-                                })
-                            })
-                            .catch((error) => {
-                                handleFeedsError(error)
-                            })
-                    }
-                })
-                .catch((error) => {
-                    handleFeedsError(error)
-                })
+                .then((response) => newLastUpdate = response.data.data)
+                .catch((error) => handleFeedsError(error))
+            if (newLastUpdate !== storeState.feedsLastUpdate){
+                await fetchFeedsData()
+                    .then((response) => {
+                        localStorage.setItem('storeFeedsUpdate', JSON.stringify(newLastUpdate))
+                        localStorage.setItem('storeFeedsData', JSON.stringify(response.data.data))
+                        storeDispatch({
+                            type: storeAction.feedsFetchSuccess,
+                            payload: {
+                                lastUpdate: newLastUpdate,
+                                feedsData: response.data.data
+                            }
+                        })
+                    })
+                    .catch((error) => handleFeedsError(error))
+            }
             await fetchProductsData()
                 .then((response) => {
                     storeDispatch({
@@ -423,11 +420,10 @@ export const StorePage = () => {
                         payload: response.data.data
                     })
                 })
-                .catch((error) => {
-                    storeDispatch({ type: storeAction.productsFetchError })
-                })
+                .catch(() => storeDispatch({ type: storeAction.productsFetchError }))
         }
         fetchStoreData()
+        storeDispatch({ type: storeAction.wasLoaded })
     }, [])
     const [collageAnimation, collageAnimationApi] = useSprings(
         storeState.productsData.length,
@@ -468,9 +464,8 @@ export const StorePage = () => {
         handleFilterbarOpen,
         handleFilterbarClose,
         sortState,
-        sortAction,
-        sortDispatch,
-        sortAnimation,
+        handleSortValue,
+        handleSortVisibility,
         storeSearchParams,
         searchParamsAction,
         handleChangeSearchParams,

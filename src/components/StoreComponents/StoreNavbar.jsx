@@ -1,4 +1,3 @@
-import {animated} from "@react-spring/web";
 import {useContext, useRef} from "react";
 import StoreContext from "./StoreContext.jsx";
 import {StoreSearchModal} from "./StoreSearchModal.jsx";
@@ -13,17 +12,14 @@ export const StoreNavbar = () => {
         handleSearchingCancel,
         searchParamsAction,
         handleChangeSearchParams,
+        storeState,
         sortState,
-        sortAction,
-        sortDispatch,
-        sortAnimation,
+        handleSortVisibility,
+        handleSortValue
     } = useContext(StoreContext)
 
     let onTyping
     const inputSearchRef = useRef(null)
-    const handleToggleSort = () => {
-        sortDispatch ({ type: sortAction.toggle })
-    }
     return (
         <>
             <div
@@ -87,41 +83,40 @@ export const StoreNavbar = () => {
                     <div className={`relative grid grid-cols-1 ${mobileUtilsState.search || mobileUtilsState.filter
                         ? 'opacity-50'
                         : 'opacity-100'}`}>
-                        <button onClick={handleToggleSort} disabled={mobileUtilsState.search || mobileUtilsState.filter}
-                                className={`${mobileUtilsState.search || mobileUtilsState.filter ? 'cursor-no-drop' : 'cursor-pointer hover:text-black hover:font-semibold '} 
+                        <button onClick={handleSortVisibility} disabled={mobileUtilsState.search || mobileUtilsState.filter}
+                                className={`${mobileUtilsState.search || mobileUtilsState.filter || storeState.isLoading ? 'cursor-no-drop' : 'cursor-pointer hover:text-black hover:font-semibold '} 
                                 relative flex gap-x-2 font-medium select-none`}>
                             Sort
-                            <i className={`${sortState.isOpen ? 'rotate-0' : 'rotate-180'} bi bi-chevron-up transition-rotate duration-300 text-lg`}></i>
+                            <i className={`${sortState.status ? 'rotate-0' : 'rotate-180'} bi bi-chevron-up transition-rotate duration-300 text-lg`}></i>
                         </button>
-                        <div
-                            className={`absolute top-[150%] w-[300%] -right-10 md:-right-2 shadow-md shadow-black/50 rounded-md bg-zinc-50 ${sortState.isOpen ? 'h-32 z-10' : 'h-0 shadow-none z-0'} transition-height duration-[400ms] overflow-hidden`}>
-                            <animated.div style={sortAnimation}
-                                          className={`grid grid-cols-1 h-full ${sortState.isOpen ? 'visible duration-100' : 'invisible duration-0'} transition-visible `}>
+                        <div className={`absolute top-[150%] w-[300%] -right-10 md:-right-2 shadow-md shadow-black/50 rounded-md bg-zinc-50 ${sortState.isVisible ? 'h-32 z-10' : 'h-0 shadow-none z-0'} transition-height duration-[400ms] overflow-hidden`}>
+                            <div className="grid grid-cols-1 h-full">
                                 <button
                                     className={`${sortState.value === 'featured' ? 'cursor-no-drop font-bold' : 'cursor-pointer hover:font-bold'} `}
-                                    disabled={sortState.value === 'featured'} onClick={() => sortDispatch({ type: sortAction.changeValue, payload: 'featured' })}>Featured
+                                    disabled={sortState.value === 'featured'} onClick={() => handleSortValue('featured')}>
+                                    Featured
                                 </button>
                                 <button
-                                    className={`${sortState === 'ascending' ? 'cursor-no-drop font-bold' : 'cursor-pointer hover:font-bold'} `}
-                                    disabled={sortState.value === 'ascending'} onClick={() => sortDispatch({ type: sortAction.changeValue, payload: 'ascending' })}>Name A
-                                    to Z
+                                    className={`${sortState.value === 'ascending' ? 'cursor-no-drop font-bold' : 'cursor-pointer hover:font-bold'} `}
+                                    disabled={sortState.value === 'ascending'} onClick={() => handleSortValue('ascending')}>
+                                    Name A to Z
                                 </button>
                                 <button
                                     className={`${sortState.value === 'descending' ? 'cursor-no-drop font-bold' : 'cursor-pointer hover:font-bold'} `}
-                                    disabled={sortState.value === 'descending'} onClick={() => sortDispatch({ type: sortAction.changeValue, payload: 'descending' })}>Name
-                                    Z to A
+                                    disabled={sortState.value === 'descending'} onClick={() => handleSortValue('descending')}>
+                                    Name Z to A
                                 </button>
                                 <button
                                     className={`${sortState.value === 'cheap' ? 'cursor-no-drop font-bold' : 'cursor-pointer hover:font-bold'} `}
-                                    disabled={sortState === 'cheap'} onClick={() => sortDispatch({ type: sortAction.changeValue, payload: 'cheap' })}>Price Low to
-                                    High
+                                    disabled={sortState === 'cheap'} onClick={() => handleSortValue('cheap')}>
+                                    Price Low to High
                                 </button>
                                 <button
                                     className={`${sortState.value === 'expensive' ? 'cursor-no-drop font-bold' : 'cursor-pointer hover:font-bold'} `}
-                                    disabled={sortState === 'expensive'} onClick={() => sortDispatch({ type: sortAction.changeValue, payload: 'expensive' })}>Price
-                                    High to Low
+                                    disabled={sortState.value === 'expensive'} onClick={() => handleSortValue('expensive')}>
+                                    Price High to Low
                                 </button>
-                            </animated.div>
+                            </div>
                         </div>
                     </div>
                     <button value="filter" disabled={mobileUtilsState.search || mobileUtilsState.filter}
